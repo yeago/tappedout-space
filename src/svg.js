@@ -6,9 +6,31 @@ import {
   repeat,
   useMemo,
   useCallback,
-  useReducer
+  useReducer,
+  useState,
+  useEffect,
+  Spring
 } from "./packages.js";
 import { Deck } from "./deck.js";
+import { useSpring, useSpring2 } from "./use-spring.js";
+import { useSprings } from "./use-springs.js";
+
+const useZoomSpring = (ix, iy, ik) => {
+  const x = useSpring2({ fromValue: ix, toValue: ix, stiffness: 120 * 2, damping: 14 * 2, mass: 1 * 2 });
+  const y = useSpring2({ fromValue: iy, toValue: iy, stiffness: 120 * 2, damping: 14 * 2, mass: 1 * 2 });
+  const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 120 * 2, damping: 14 * 3, mass: 1 * 2 });
+  const update = useCallback((_x, _y, _k) => {
+    x.updateConfig({ toValue: _x });
+    y.updateConfig({ toValue: _y });
+    k.updateConfig({ toValue: _k });
+    x.start();
+    y.start();
+    k.start();
+  }, [x, y, k]);
+  const springs = useMemo(() => { return [x, y, k]; }, [x, y, k]);
+  const syncedValues = useSprings(springs);
+  return { update, syncedValues };
+};
 
 const composeActiveReducer = type => {
   return (state, action) => {
@@ -113,24 +135,54 @@ export const Svg = ({ data, width, height }) => {
     [zoom, unzoom]
   );
   const r = 10;
-  const transform = useMemo(() => {
-    if (!zoomed) return `translate(0, 0) scale(1)`;
-    const size = r * 15;
-    const zoomedDeck = bySlug[zoomed];
-    const centerX = xScale(zoomedDeck.x);
-    const centerY = yScale(zoomedDeck.y);
-    const start = [centerX, centerY, size];
-    const k = Math.min(width, height) / start[2]; // scale
-    const translate = [
-      width / 2 - start[0] * k,
-      height / 2 - start[1] * k
-    ];
-    // as a transform attribute
+  //const [translateX, setSpringX] = useSpring2(0);
+  //const [translateY, setSpringY] = useSpring2(0);
+  //const [k, setSpringK] = useSpring2(1);
+  const { syncedValues, update: updateZoomSpring } = useZoomSpring(0,0,1);
+  //const transform = useMemo(() => {
+    //if (!zoomed) return `translate(0, 0) scale(1)`;
+    //const size = r * 15;
+    //const zoomedDeck = bySlug[zoomed];
+    //const centerX = xScale(zoomedDeck.x);
+    //const centerY = yScale(zoomedDeck.y);
+    //const start = [centerX, centerY, size];
+    //const k = Math.min(width, height) / start[2]; // scale
+    //const translate = [
+      //width / 2 - start[0] * k,
+      //height / 2 - start[1] * k
+    //];
+    //// as a transform attribute
     //const transformStart = `translate(${translate}) scale(${k})`;
-    // as a transform style
-    const transformStart = `translate(${translate.map(v => `${v}px`)}) scale(${k})`;
-    return transformStart;
+    //return transformStart;
+    //// as a transform style
+    ////const transformStart = `translate(${translate.map(v => `${v}px`)}) scale(${k})`;
+    ////return transformStart;
+  //}, [bySlug, zoomed, width, height]);
+  useEffect(() => {
+    if (!zoomed) {
+      //setSpringX(0);
+      //setSpringY(0);
+      //setSpringK(1);
+      updateZoomSpring(0, 0, 1);
+    } else {
+      const size = r * 15;
+      const zoomedDeck = bySlug[zoomed];
+      const centerX = xScale(zoomedDeck.x);
+      const centerY = yScale(zoomedDeck.y);
+      const start = [centerX, centerY, size];
+      const k = Math.min(width, height) / start[2]; // scale
+      const translate = [
+        width / 2 - start[0] * k,
+        height / 2 - start[1] * k
+      ];
+      //setSpringX(translate[0]);
+      //setSpringY(translate[1]);
+      //setSpringK(k);
+      updateZoomSpring(...translate, k);
+    }
   }, [bySlug, zoomed, width, height]);
+  const [translateX, translateY, k] = syncedValues;
+  const transform = `translate(${translateX}, ${translateY}) scale(${k})`;
   return html`
     <svg
       viewBox="${viewBox}"
@@ -146,14 +198,14 @@ export const Svg = ({ data, width, height }) => {
         }
         .view {
           will-change: transform;
-          transition: transform 0.7s ease-in-out;
+          xtransition: transform 0.7s ease-in-out;
         }
       `}"
       @mouseover=${mouseover}
       @mouseout=${mouseout}
       @click=${click}
     >
-      <g id="view" style="transform: ${transform}" class="view">
+      <g id="view" transform="${transform}" class="view">
         ${repeat(
           reorderedDecks,
           deck => deck.slug,
