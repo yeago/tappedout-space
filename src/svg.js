@@ -14,6 +14,7 @@ import {
 import { Deck } from "./deck.js";
 import { useSpring, useSpring2 } from "./use-spring.js";
 import { useSprings } from "./use-springs.js";
+import { useComposeActiveState } from "./use-compose-active-state.js";
 
 const useZoomSpring = (ix, iy, ik) => {
   const x = useSpring2({ fromValue: ix, toValue: ix, stiffness: 120 * 2, damping: 14 * 2, mass: 1 * 2 });
@@ -32,50 +33,8 @@ const useZoomSpring = (ix, iy, ik) => {
   return { update, syncedValues };
 };
 
-const composeActiveReducer = type => {
-  return (state, action) => {
-    switch (action.type) {
-      case `ON-${type}`: {
-        return action.value;
-      }
-      case `OFF-${type}`: {
-        return state === action.value ? null : state;
-      }
-      case `RESET`: {
-        return null;
-      }
-      default: {
-        return state;
-      }
-    }
-  };
-};
 
-const useComposeActions = (dispatch, type) => {
-  return useMemo(
-    () => ({
-      on: value => {
-        dispatch({ type: `ON-${type}`, value });
-      },
-      off: value => {
-        dispatch({ type: `OFF-${type}`, value });
-      },
-      reset: () => dispatch({ type: 'RESET' })
-    }),
-    [dispatch, type]
-  );
-};
-
-const useComposeActiveState = type => {
-  const reducer = useMemo(() => {
-    return composeActiveReducer(type);
-  }, [type]);
-  const [value, dispatch] = useReducer(reducer, null);
-  const actions = useComposeActions(dispatch, type);
-  return { value, ...actions };
-};
-
-export const Svg = ({ data, width, height }) => {
+export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
   const viewBox = `0 0 ${width} ${height}`;
   const decks = data.nodes;
   const {
@@ -83,10 +42,7 @@ export const Svg = ({ data, width, height }) => {
     on: highlight,
     off: unhighlight
   } = useComposeActiveState("HIGHLIGHT");
-  const { value: zoomed, on: zoom, reset: unzoom } = useComposeActiveState(
-    "ZOOM"
-  );
-  const { xValues, yValues, xScale, yScale, bySlug } = useMemo(() => {
+  const { xValues, yValues, xScale, yScale } = useMemo(() => {
     const xValues = decks.map(({ x }) => x);
     const yValues = decks.map(({ y }) => y);
     const xScale = scaleLinear()
@@ -95,11 +51,7 @@ export const Svg = ({ data, width, height }) => {
     const yScale = scaleLinear()
       .domain([Math.min(...yValues), Math.max(...yValues)])
       .range([height, 0]);
-    const bySlug = decks.reduce((bySlug, deck) => {
-      bySlug[deck.slug] = deck;
-      return bySlug;
-    }, {});
-    return { xValues, yValues, xScale, yScale, bySlug };
+    return { xValues, yValues, xScale, yScale };
   }, [decks, width, height]);
   const reorderedDecks = useMemo(() => {
     if (highlighted) {

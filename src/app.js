@@ -5,11 +5,13 @@ import {
   virtual,
   useCallback,
   useEffect,
-  css,
+  useMemo,
+  css
 } from "./packages.js";
 import { useViewport } from "./use-viewport.js";
 import { Svg } from "./svg.js";
 import { Hud } from "./hud.js";
+import { useComposeActiveState } from "./use-compose-active-state.js";
 
 const styles = css`
   color: white;
@@ -21,6 +23,19 @@ const styles = css`
 
 export const App = virtual(({ data }) => {
   const { width, height } = useViewport();
+  const { value: zoomed, on: zoom, reset: unzoom } = useComposeActiveState(
+    "ZOOM"
+  );
+
+  const decks = data.nodes;
+  const bySlug = useMemo(
+    () =>
+      decks.reduce((bySlug, deck) => {
+        bySlug[deck.slug] = deck;
+        return bySlug;
+      }, {}),
+    [decks]
+  );
   return html`
     <div
       style="
@@ -29,7 +44,8 @@ export const App = virtual(({ data }) => {
       "
       class="${styles}"
     >
-      ${Hud({ width, height, data })} ${Svg({ width, height, data })}
+      ${Hud({ width, height, data, bySlug, zoomed })}
+      ${Svg({ width, height, data, zoomed, zoom, unzoom, bySlug })}
     </div>
   `;
 });

@@ -1,6 +1,12 @@
 import { html, css } from "./packages.js";
 
-export const Hud = ({ width, height }) => {
+const parseCluster = cluster => {
+  const [W, U, B, R, G] = cluster.split('-');
+  return {B, G, R, U, W};
+};
+
+export const Hud = ({ width, height, bySlug, zoomed }) => {
+  const deck = bySlug[zoomed];
   return html`
     <div
       class=${css`
@@ -16,6 +22,18 @@ export const Hud = ({ width, height }) => {
       --viewport-width: ${width};
       <br />
       --viewport-height: ${height};
+      <br />
+      ${deck ? html`
+      Name: ${deck.name}
+      <br />
+      URL: ${deck.url}
+      <br />
+      Mana Colors: ${deck.mana_colors}
+      <br />
+      Cluster: ${Object.entries(parseCluster(deck.cluster))}
+      <br />
+      <img src="${deck.mana_chart_thumbnail}" />
+      ` : '' }
     </div>
   `;
 };
