@@ -5,25 +5,31 @@ import {
   virtual,
   useCallback,
   useEffect,
-  css
+  css,
 } from "./packages.js";
-import { useViewport } from './use-viewport.js';
-import { Svg } from './svg.js';
-import { Hud } from './hud.js';
+import { useViewport } from "./use-viewport.js";
+import { Svg } from "./svg.js";
+import { Hud } from "./hud.js";
 
-export const App = virtual(() => {
+const styles = css`
+  color: white;
+  font-family: sans-serif;
+  height: 100%;
+  overflow: hidden;
+  width: 100%;
+`;
+
+export const App = virtual(({ data }) => {
   const { width, height } = useViewport();
   return html`
     <div
-      class="${css`
+      style="
         --viewport-width: ${width};
         --viewport-height: ${height};
-        color: white;
-        font-family: sans-serif;
-      `}"
+      "
+      class="${styles}"
     >
-      ${Hud({ width, height })}
-      ${Svg({ width, height })}
+      ${Hud({ width, height, data })} ${Svg({ width, height, data })}
     </div>
   `;
 });
