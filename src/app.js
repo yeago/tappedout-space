@@ -28,14 +28,18 @@ export const App = virtual(({ data }) => {
   );
 
   const decks = data.nodes;
+  const decksWithClusters = useMemo(() => {
+    return decks.filter(deck => deck.cluster);
+  }, [decks]);
   const bySlug = useMemo(
     () =>
-      decks.reduce((bySlug, deck) => {
+      decksWithClusters.reduce((bySlug, deck) => {
         bySlug[deck.slug] = deck;
         return bySlug;
       }, {}),
-    [decks]
+    [decksWithClusters]
   );
+  const dataWithClusters = { ...data, nodes: decksWithClusters };
   return html`
     <div
       style="
@@ -44,8 +48,8 @@ export const App = virtual(({ data }) => {
       "
       class="${styles}"
     >
-      ${Hud({ width, height, data, bySlug, zoomed })}
-      ${Svg({ width, height, data, zoomed, zoom, unzoom, bySlug })}
+      ${Hud({ width, height, data: dataWithClusters, bySlug, zoomed })}
+      ${Svg({ width, height, data: dataWithClusters, zoomed, zoom, unzoom, bySlug })}
     </div>
   `;
 });

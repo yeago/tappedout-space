@@ -1,9 +1,5 @@
 import { html, css } from "./packages.js";
-
-const parseCluster = cluster => {
-  const [W, U, B, R, G] = cluster.split('-');
-  return {B, G, R, U, W};
-};
+import { parseCluster } from "./parse-cluster.js";
 
 export const Hud = ({ width, height, bySlug, zoomed }) => {
   const deck = bySlug[zoomed];
