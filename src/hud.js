@@ -9,8 +9,8 @@ export const Hud = ({ width, height, bySlug, zoomed }) => {
         cursor: pointer;
         position: absolute;
         pointer-events: none;
-        left: 0;
-        top: 0;
+        left: 10px;
+        top: 10px;
         height: var(--viewport-height);
         width: var(--viewport-width);
       `}
@@ -27,6 +27,10 @@ export const Hud = ({ width, height, bySlug, zoomed }) => {
       Mana Colors: ${deck.mana_colors}
       <br />
       Cluster: ${Object.entries(parseCluster(deck.cluster))}
+      <br />
+      x: ${deck.x}
+      <br />
+      y: ${deck.y}
       <br />
       <img src="${deck.mana_chart_thumbnail}" />
       ` : '' }

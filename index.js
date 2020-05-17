@@ -1,7 +1,8 @@
 console.time('load');
 import { App } from "./src/app.js";
 import { render } from "./src/packages.js";
-import { data } from "./data.js";
+import { data } from "./data.js"; // 250 cards
+//import { data } from "./data-2.js"; // 500 cards
 console.timeEnd('load');
 console.log('data', data);
 

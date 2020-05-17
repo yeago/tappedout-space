@@ -86,35 +86,10 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
     },
     [zoom, unzoom]
   );
-  const r = 10;
-  //const [translateX, setSpringX] = useSpring2(0);
-  //const [translateY, setSpringY] = useSpring2(0);
-  //const [k, setSpringK] = useSpring2(1);
+  const r = 5;
   const { syncedValues, update: updateZoomSpring } = useZoomSpring(0,0,1);
-  //const transform = useMemo(() => {
-    //if (!zoomed) return `translate(0, 0) scale(1)`;
-    //const size = r * 15;
-    //const zoomedDeck = bySlug[zoomed];
-    //const centerX = xScale(zoomedDeck.x);
-    //const centerY = yScale(zoomedDeck.y);
-    //const start = [centerX, centerY, size];
-    //const k = Math.min(width, height) / start[2]; // scale
-    //const translate = [
-      //width / 2 - start[0] * k,
-      //height / 2 - start[1] * k
-    //];
-    //// as a transform attribute
-    //const transformStart = `translate(${translate}) scale(${k})`;
-    //return transformStart;
-    //// as a transform style
-    ////const transformStart = `translate(${translate.map(v => `${v}px`)}) scale(${k})`;
-    ////return transformStart;
-  //}, [bySlug, zoomed, width, height]);
   useEffect(() => {
     if (!zoomed) {
-      //setSpringX(0);
-      //setSpringY(0);
-      //setSpringK(1);
       updateZoomSpring(0, 0, 1);
     } else {
       const size = r * 15;
@@ -127,23 +102,31 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
         width / 2 - start[0] * k,
         height / 2 - start[1] * k
       ];
-      //setSpringX(translate[0]);
-      //setSpringY(translate[1]);
-      //setSpringK(k);
       updateZoomSpring(...translate, k);
     }
   }, [bySlug, zoomed, width, height]);
   const [translateX, translateY, k] = syncedValues;
   const transform = `translate(${translateX}, ${translateY}) scale(${k})`;
+  const circumference = 2 * Math.PI * r;
   return html`
     <svg
       viewBox="${viewBox}"
       xmlns="http://www.w3.org/2000/svg"
       class="${css`
+        --circumference: ${circumference};
+        --r: ${r}px;
+
+        .slice {
+          --stroke-width: ${r};
+          stroke-width: var(--stroke-width);
+          r: var(--r);
+          fill: transparent;
+        }
+
         .deck {
           fill: hsl(100, 70%, 80%);
-          opacity: 0.7;
-          r: ${r}px;
+          r: var(--r);
+
           &[data-highlighted="true"] {
             fill: white;
           }
@@ -166,7 +149,9 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
               deck,
               cx: xScale(deck.x),
               cy: yScale(deck.y),
-              highlighted: deck.slug === highlighted
+              r,
+              highlighted: deck.slug === highlighted,
+              circumference
             });
           }
         )}
