@@ -34,11 +34,11 @@ const useComposeActions = (dispatch, type) => {
   );
 };
 
-export const useComposeActiveState = type => {
+export const useComposeActiveState = (type, initialState = null) => {
   const reducer = useMemo(() => {
     return composeActiveReducer(type);
   }, [type]);
-  const [value, dispatch] = useReducer(reducer, null);
+  const [value, dispatch] = useReducer(reducer, initialState);
   const actions = useComposeActions(dispatch, type);
   return { value, ...actions };
 };

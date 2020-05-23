@@ -82,30 +82,34 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
   const click = useCallback(
     e => {
       const slug = e.target.dataset.slug;
-      if (slug) zoom(slug);
+      if (slug) window.location.hash = slug;
+      //if (slug) zoom(slug);
       else unzoom();
     },
     [zoom, unzoom]
   );
   const r = 5;
-  const { syncedValues, update: updateZoomSpring } = useZoomSpring(0,0,1);
+
+  const nextZoom = ((r, zoomedDeck) => {
+    if (!zoomedDeck) return [0, 0, 1];
+    const size = r * 15;
+    const centerX = xScale(zoomedDeck.x);
+    const centerY = yScale(zoomedDeck.y);
+    const k = Math.min(width, height) / size; // scale
+    const translate = [
+      width / 2 - centerX * k,
+      height / 2 - centerY * k
+    ];
+    return [...translate, k];
+  })(r, zoomed && bySlug[zoomed]);
+
+  const { syncedValues, update: updateZoomSpring } = useZoomSpring(
+    ...nextZoom
+  );
   useEffect(() => {
-    if (!zoomed) {
-      updateZoomSpring(0, 0, 1);
-    } else {
-      //const size = r * 15;
-      const size = r * 10;
-      const zoomedDeck = bySlug[zoomed];
-      const centerX = xScale(zoomedDeck.x);
-      const centerY = yScale(zoomedDeck.y);
-      const k = Math.min(width, height) / size; // scale
-      const translate = [
-        width / 2 - centerX * k,
-        height / 2 - centerY * k
-      ];
-      updateZoomSpring(...translate, k);
-    }
-  }, [bySlug, zoomed, width, height]);
+    updateZoomSpring(...nextZoom);
+  }, [...nextZoom]);
+
   const [translateX, translateY, k] = syncedValues;
   const transform = `translate(${translateX}, ${translateY}) scale(${k})`;
   const circumference = 2 * Math.PI * r;
