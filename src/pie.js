@@ -8,7 +8,34 @@ const sum = (...values) => {
   return values.reduce(add, 0);
 };
 
-export const Deck = ({ deck, cx, cy, highlighted, r, circumference }) => {
+const Slice = ({
+  percentage,
+  color,
+  cx,
+  cy,
+  deck,
+  circumference,
+  highlighted,
+  rotate
+}) => {
+  return svg`
+    <circle
+      cx="${cx}"
+      cy="${cy}"
+      class="slice"
+      data-slug="${deck.slug}"
+      id="deck-${deck.slug}-${color}"
+      data-highlighted=${highlighted}
+      style="
+        stroke: ${color};
+        stroke-dasharray: ${percentage * circumference} var(--circumference);
+      "
+      transform="rotate(${rotate},${cx},${cy})"
+    />
+  `;
+};
+
+export const Pie = ({ deck, cx, cy, highlighted, r, circumference }) => {
   const cluster = parseCluster(deck.cluster);
   const slice = ({ percentage, color, rotate }) => {
     if (percentage === 0) return "";
@@ -31,7 +58,6 @@ export const Deck = ({ deck, cx, cy, highlighted, r, circumference }) => {
     { percentage: cluster.G, color: "green" },
     { percentage: cluster.R, color: "red" }
   ];
-  const gradient = `grad_${deck.mana_colors.join('')}`;
   return svg`
     <g>
       <circle
@@ -41,8 +67,17 @@ export const Deck = ({ deck, cx, cy, highlighted, r, circumference }) => {
         data-slug="${deck.slug}"
         id="deck-${deck.slug}"
         data-highlighted=${highlighted}
-        fill=${`url(#${gradient})`}
+        style="
+          xstroke: black;
+          xstroke-dasharray: ${cluster.B * circumference} var(--circumference);
+        "
       />
+      ${slices.map((props, index) => {
+        const totalPercentages = sum(
+          ...slices.slice(0, index + 1).map(p => p.percentage)
+        );
+        return slice({ ...props, rotate: totalPercentages * 360 });
+      })}
     </g>
   `;
 };

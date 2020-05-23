@@ -9,10 +9,9 @@ export const Hud = ({ width, height, bySlug, zoomed }) => {
         cursor: pointer;
         position: absolute;
         pointer-events: none;
-        left: 10px;
-        top: 10px;
         height: var(--viewport-height);
         width: var(--viewport-width);
+        padding: 10px;
       `}
     >
       --viewport-width: ${width};
