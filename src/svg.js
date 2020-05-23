@@ -93,15 +93,15 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
     if (!zoomed) {
       updateZoomSpring(0, 0, 1);
     } else {
-      const size = r * 15;
+      //const size = r * 15;
+      const size = r * 10;
       const zoomedDeck = bySlug[zoomed];
       const centerX = xScale(zoomedDeck.x);
       const centerY = yScale(zoomedDeck.y);
-      const start = [centerX, centerY, size];
-      const k = Math.min(width, height) / start[2]; // scale
+      const k = Math.min(width, height) / size; // scale
       const translate = [
-        width / 2 - start[0] * k,
-        height / 2 - start[1] * k
+        width / 2 - centerX * k,
+        height / 2 - centerY * k
       ];
       updateZoomSpring(...translate, k);
     }

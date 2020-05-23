@@ -12,23 +12,22 @@ const calculateOffset = (i, total) => {
   return offsets[total - 1][i];
 };
 
-const LinearGradient = stops => {
-
+const LinearGradient = (stops) => {
   return svg`
-    <radialGradient id="grad_${stops}">
+    <linearGradient id="grad_${stops}" x1="0" x2="0" y1="1" y2="0">
       ${stops.split("").map((stop, i) => {
         const offset = calculateOffset(i, stops.length);
         return svg`<stop class="stop-${stop}" offset="${offset}%" />`;
       })}
-    </radialGradient>
+    </linearGradient>
   `;
 };
 
-export const LinearGradients = reorderedDecks => {
+export const LinearGradients = (reorderedDecks) => {
   const gradients = useMemo(() => {
-    return new Set(reorderedDecks.map(deck => deck.mana_colors.join("")));
+    return new Set(reorderedDecks.map((deck) => deck.mana_colors.join("")));
   }, [reorderedDecks]);
-  return svg`${[...gradients].map(stops => {
+  return svg`${[...gradients].map((stops) => {
     return LinearGradient(stops);
   })}`;
 };
