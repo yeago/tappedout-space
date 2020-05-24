@@ -8,29 +8,8 @@ const sum = (...values) => {
   return values.reduce(add, 0);
 };
 
-export const Deck = ({ deck, cx, cy, highlighted, r, circumference }) => {
+export const Deck = ({ deck, cx, cy, highlighted, zoomed, r, circumference }) => {
   const cluster = parseCluster(deck.cluster);
-  const slice = ({ percentage, color, rotate }) => {
-    if (percentage === 0) return "";
-    return Slice({
-      deck,
-      cx,
-      cy,
-      highlighted,
-      r,
-      circumference,
-      percentage,
-      color,
-      rotate
-    });
-  };
-  const slices = [
-    { percentage: cluster.B, color: "black" },
-    { percentage: cluster.U, color: "blue" },
-    { percentage: cluster.W, color: "white" },
-    { percentage: cluster.G, color: "green" },
-    { percentage: cluster.R, color: "red" }
-  ];
   const gradient = `grad_${deck.mana_colors.join('')}`;
   return svg`
     <g>
@@ -41,6 +20,7 @@ export const Deck = ({ deck, cx, cy, highlighted, r, circumference }) => {
         data-slug="${deck.slug}"
         id="deck-${deck.slug}"
         data-highlighted=${highlighted}
+        data-zoomed=${zoomed}
         fill=${`url(#${gradient})`}
       />
     </g>

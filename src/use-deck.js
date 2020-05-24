@@ -10,10 +10,25 @@ const initialState = {
   bySlug: {
     // { json, slug, loading }
   },
-  json: null,
   lastLoadingSlug: location.hash.replace('#', ''),
   lastLoadedSlug: null,
   loading: false,
+};
+
+const loadingReducer = (state, action) => {
+  console.log('loading reducer called with state, action', state, action);
+  const isFinishedLoading = state.lastLoadingSlug === action.slug;
+  const loading = isFinishedLoading ? false : state.loading;
+  const bySlugWithLatestDeck = {
+    [action.slug]: { loading: false, json: action.json, slug: action.slug }
+  };
+  const bySlug = isFinishedLoading ? bySlugWithLatestDeck : { ...state.bySlug, ...bySlugWithLatestDeck };
+  return {
+    ...state,
+    loading,
+    lastLoadedSlug: action.slug,
+    bySlug
+  };
 };
 
 const reducer = (state, action) => {
@@ -30,19 +45,7 @@ const reducer = (state, action) => {
       };
     }
     case `loaded`: {
-      return {
-        ...state,
-        loading: false,
-        lastLoadedSlug: action.slug,
-        bySlug: {
-          ...state.bySlug,
-          [action.slug]: {
-            loading: false,
-            json: action.json,
-            slug: action.slug,
-          },
-        },
-      };
+      return loadingReducer(state, action);
     }
   }
   return state;
