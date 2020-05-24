@@ -13,7 +13,7 @@ import { Svg } from "./svg.js";
 import { Hud } from "./hud.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
 import { useLocationHash } from "./use-location-hash.js";
-import { useDeck } from "./use-deck.js";
+import { useSpace } from "./use-space.js";
 
 const styles = css`
   color: white;
@@ -41,7 +41,7 @@ const detectBounds = (nodes) => {
 const EMPTY_ARRAY = [];
 
 export const App = virtual(() => {
-  const state = useDeck();
+  const state = useSpace();
   const slug = state.lastLoadingSlug;
   const json = state.lastLoadedSlug && state.bySlug[state.lastLoadedSlug].json;
   const { width, height } = useViewport();
@@ -54,7 +54,7 @@ export const App = virtual(() => {
     zoom(slug);
   }, [zoom, slug]);
 
-  const decks = json?.nodes ?? EMPTY_ARRAY;
+  const decks = json && json.nodes || EMPTY_ARRAY;
 
   detectBounds(decks);
 
@@ -82,7 +82,6 @@ export const App = virtual(() => {
       ${Hud({
         width,
         height,
-        data: dataWithClusters,
         bySlug,
         zoomed,
         loading: state.loading,

@@ -2,10 +2,6 @@ import { useEffect, useState, useReducer } from "./packages.js";
 import { useLocationHash } from "./use-location-hash.js";
 import { defaultSlug, fetchDeck } from "./fetch-deck.js";
 
-const emptyState = {
-  nodes: [],
-};
-
 const initialState = {
   bySlug: {
     // { json, slug, loading }
@@ -16,7 +12,6 @@ const initialState = {
 };
 
 const loadingReducer = (state, action) => {
-  console.log('loading reducer called with state, action', state, action);
   const isFinishedLoading = state.lastLoadingSlug === action.slug;
   const loading = isFinishedLoading ? false : state.loading;
   const bySlugWithLatestDeck = {
@@ -31,18 +26,24 @@ const loadingReducer = (state, action) => {
   };
 };
 
+const loadReducer = (state, action) => {
+  const isPresent = action.slug in state.bySlug;
+  const bySlug = isPresent ? state.bySlug : {
+    ...state.bySlug,
+    [action.slug]: { loading: true, json: null, slug: action.slug },
+  };
+  return {
+    ...state,
+    loading: bySlug[action.slug].loading,
+    lastLoadingSlug: action.slug,
+    bySlug
+  };
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case `load`: {
-      return {
-        ...state,
-        loading: true,
-        lastLoadingSlug: action.slug,
-        bySlug: {
-          ...state.bySlug,
-          [action.slug]: { loading: true, json: null, slug: action.slug },
-        },
-      };
+      return loadReducer(state, action);
     }
     case `loaded`: {
       return loadingReducer(state, action);
@@ -51,7 +52,7 @@ const reducer = (state, action) => {
   return state;
 };
 
-export const useDeck = (slug) => {
+export const useSpace = () => {
   const hash = useLocationHash();
   const [state, dispatch] = useReducer(reducer, initialState);
   useEffect(async () => {
