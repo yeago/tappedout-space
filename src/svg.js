@@ -47,12 +47,12 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
     const xValues = decks.map(({ x }) => x);
     const yValues = decks.map(({ y }) => y);
     const xScale = scaleLinear()
-      //.domain([Math.min(...xValues), Math.max(...xValues)])
-      .domain([0, 13.524832725524902])
+      .domain([Math.min(...xValues), Math.max(...xValues)])
+      //.domain([0, 13.524832725524902])
       .range([0, width]);
     const yScale = scaleLinear()
-      //.domain([Math.min(...yValues), Math.max(...yValues)])
-      .domain([-0.23971568048000336, 4.435561180114746])
+      .domain([Math.min(...yValues), Math.max(...yValues)])
+      //.domain([-0.23971568048000336, 4.435561180114746])
       .range([height, 0]);
     return { xValues, yValues, xScale, yScale };
   }, [decks, width, height]);
@@ -97,11 +97,11 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
     },
     [zoom, unzoom]
   );
-  const r = 2;
+  const r = 10;
 
   const nextZoom = ((r, zoomedDeck) => {
     if (!zoomedDeck) return [0, 0, 1];
-    const size = r * 20; // the larger the factor, the more zoomed out. r = 1 will fill the viewport with the deck
+    const size = r * 20//4; // the larger the factor, the more zoomed out. r = 1 will fill the viewport with the deck
     const centerX = xScale(zoomedDeck.x);
     const centerY = yScale(zoomedDeck.y);
     const k = Math.min(width, height) / size; // scale
