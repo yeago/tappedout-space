@@ -16,5 +16,13 @@
   "bugs": {
     "url": "https://github.com/yeago/tappedout-space/issues"
   },
-  "homepage": "https://github.com/yeago/tappedout-space#readme"
+  "homepage": "https://github.com/yeago/tappedout-space#readme",
+  "dependencies": {
+    "lit-html": "1.2.0",
+    "haunted": "4.7.0",
+    "emotion": "^10.0.27",
+    "d3-scale": "3.2.1",
+    "d3-interpolate": "1.4.0",
+
+  }
 }
