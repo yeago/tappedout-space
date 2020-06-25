@@ -12,7 +12,7 @@ export {
   useRef,
   useContext,
   virtual
-} from 'haunted.js';
+} from 'haunted';
 
 export { css, cx } from 'emotion';
 
