@@ -22,7 +22,6 @@
     "haunted": "4.7.0",
     "emotion": "^10.0.27",
     "d3-scale": "3.2.1",
-    "d3-interpolate": "1.4.0",
-
+    "d3-interpolate": "1.4.0"
   }
 }
