@@ -47,11 +47,13 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
     const xValues = decks.map(({ x }) => x);
     const yValues = decks.map(({ y }) => y);
     const xScale = scaleLinear()
-      .domain([Math.min(...xValues), Math.max(...xValues)])
+      .domain([data.limit_coordinates.min_coordinates.x,
+               data.limit_coordinates.max_coordinates.x])
       //.domain([0, 13.524832725524902])
       .range([0, width]);
     const yScale = scaleLinear()
-      .domain([Math.min(...yValues), Math.max(...yValues)])
+      .domain([data.limit_coordinates.min_coordinates.y,
+               data.limit_coordinates.max_coordinates.y])
       //.domain([-0.23971568048000336, 4.435561180114746])
       .range([height, 0]);
     return { xValues, yValues, xScale, yScale };

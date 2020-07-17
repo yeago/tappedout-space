@@ -1,4 +1,4 @@
-export const defaultSlug = `16-05-20-black-zombie`;
+export const defaultSlug = window.django.deckSlug;
 
 export const fetchDeck = async (slug = defaultSlug) => {
   //console.log('fetchDeck called with', slug);
