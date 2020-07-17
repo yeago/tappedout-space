@@ -47,11 +47,13 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
     const xValues = decks.map(({ x }) => x);
     const yValues = decks.map(({ y }) => y);
     const xScale = scaleLinear()
-      .domain([Math.min(...xValues), Math.max(...xValues)])
+      .domain([data.limit_coordinates.min_coordinates.x,
+               data.limit_coordinates.max_coordinates.x])
       //.domain([0, 13.524832725524902])
       .range([0, width]);
     const yScale = scaleLinear()
-      .domain([Math.min(...yValues), Math.max(...yValues)])
+      .domain([data.limit_coordinates.min_coordinates.y,
+               data.limit_coordinates.max_coordinates.y])
       //.domain([-0.23971568048000336, 4.435561180114746])
       .range([height, 0]);
     return { xValues, yValues, xScale, yScale };
@@ -97,11 +99,17 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
     },
     [zoom, unzoom]
   );
-  const r = 10;
+  // r = 1 is equal to 1px while completely zoomed out, when the coordinate space is entirely in view.
+  const r = 0.1; // radius
+  const diameter = r * 2;
 
   const nextZoom = ((r, zoomedDeck) => {
+    // returning [0, 0, 1] will fit the entire coordinate space into the svg area, viewing everything. Decks will look tiny.
     if (!zoomedDeck) return [0, 0, 1];
-    const size = r * 20//4; // the larger the factor, the more zoomed out. r = 1 will fill the viewport with the deck
+    // the larger the factor, the more zoomed out.
+    // size = 1 * diameter means that one deck circle will fit the viewport at the smallest dimension.
+    // size = 10 * diameter means that ten deck circles can fit the viewport at the smallest dimension.
+    const size = diameter * 10
     const centerX = xScale(zoomedDeck.x);
     const centerY = yScale(zoomedDeck.y);
     const k = Math.min(width, height) / size; // scale
@@ -131,13 +139,14 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
         --r: ${r}px;
 
         .slice {
-          --stroke-width: ${r};
+          --stroke-width: ${r / 4};
           stroke-width: var(--stroke-width);
           r: var(--r);
           fill: transparent;
         }
 
         .deck {
+          --stroke-width: ${r / 4};
           cursor: pointer;
           xfill: transparent;
           xstroke: #ccc;
@@ -149,12 +158,12 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
 
           &[data-highlighted="true"] {
             stroke: white;
-            stroke-width: 0.1;
+            stroke-width: calc(var(--r) / 7);
           }
 
           &[data-zoomed="true"], &:active {
             stroke: white;
-            stroke-width: 0.5;
+            stroke-width: calc(var(--r) / 5);
           }
         }
         .view {
