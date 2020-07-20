@@ -95,7 +95,6 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
       const slug = e.target.dataset.slug;
       if (slug) window.location.hash = slug;
       //if (slug) zoom(slug);
-      else unzoom();
     },
     [zoom, unzoom]
   );

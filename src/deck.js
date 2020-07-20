@@ -11,11 +11,18 @@ const sum = (...values) => {
 export const Deck = ({ deck, cx, cy, highlighted, zoomed, r, circumference }) => {
   const cluster = parseCluster(deck.cluster);
   const gradient = `grad_${deck.mana_colors.join('')}`;
+  const rByVotes = (deck) => {
+    if (deck.votes > 3) return 'medium';
+    if (deck.votes > 10) return 'large';
+    return 'small'
+  }
+  const gClass = `node-${rByVotes(deck)}`
   return svg`
-    <g>
+    <g class="${gClass}">
       <circle
         cx="${cx}"
         cy="${cy}"
+        r=${r}
         class="deck"
         data-slug="${deck.slug}"
         id="deck-${deck.slug}"
