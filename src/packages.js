@@ -1,5 +1,7 @@
 export { svg, render } from 'https://unpkg.com/lit-html@1.2.1/lit-html.js';
+//export { svg, render } from 'https://cdn.skypack.dev/lit-html@^1.2.1';
 export { repeat } from 'https://unpkg.com/lit-html@1.2.1/directives/repeat.js';
+//export { repeat } from 'https://cdn.skypack.dev/lit-html@^1.2.1/directives/repeat.js';
 export {
   html,
   component,
@@ -13,6 +15,7 @@ export {
   useContext,
   virtual
 } from 'https://unpkg.com/haunted@4.7.0/haunted.js';
+//} from 'https://cdn.skypack.dev/haunted@^4.7.0';
 
 export { css, cx } from 'https://cdn.skypack.dev/emotion@10';
 
