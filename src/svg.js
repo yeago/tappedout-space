@@ -149,7 +149,8 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
           cursor: pointer;
           xfill: transparent;
           xstroke: #ccc;
-          r: var(--r);
+          --r-scale: 1;
+          r: calc(var(--r) * var(--r-scale));
           transition-duration: 0.15s;
           transition-property: stroke-width;
           transition-timing-function: ease-in-out;
@@ -163,6 +164,18 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
           &[data-zoomed="true"], &:active {
             stroke: white;
             stroke-width: calc(var(--r) / 5);
+          }
+
+          &[data-votes-size="small"] {
+            --r-scale: 0.6;
+          }
+
+          &[data-votes-size="medium"] {
+            --r-scale: 0.8;
+          }
+
+          &[data-votes-size="large"] {
+            --r-scale: 1;
           }
         }
         .view {
