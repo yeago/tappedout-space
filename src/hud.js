@@ -6,9 +6,12 @@ export const Hud = ({ width, height, bySlug, zoomed, loading }) => {
   return html`
     <div
       class=${css`
-        cursor: pointer;
         position: absolute;
         padding: 10px;
+
+        a {
+          color: lightblue;
+        }
       `}
     >
       ${deck ? html`
