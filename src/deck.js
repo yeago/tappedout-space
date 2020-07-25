@@ -8,26 +8,26 @@ const sum = (...values) => {
   return values.reduce(add, 0);
 };
 
+const votesSize = (votes) => {
+  if (votes > 3) return 'medium';
+  if (votes > 10) return 'large';
+  return 'small'
+}
+
 export const Deck = ({ deck, cx, cy, highlighted, zoomed, r, circumference }) => {
   const cluster = parseCluster(deck.cluster);
   const gradient = `grad_${deck.mana_colors.join('')}`;
-  const rByVotes = (deck) => {
-    if (deck.votes > 3) return 'medium';
-    if (deck.votes > 10) return 'large';
-    return 'small'
-  }
-  const gClass = `node-${rByVotes(deck)}`
   return svg`
-    <g class="${gClass}">
+    <g>
       <circle
         cx="${cx}"
         cy="${cy}"
-        r=${r}
         class="deck"
         data-slug="${deck.slug}"
         id="deck-${deck.slug}"
         data-highlighted=${highlighted}
         data-zoomed=${zoomed}
+        data-votes-size=${votesSize(deck.votes)}
         fill=${`url(#${gradient})`}
       />
     </g>
