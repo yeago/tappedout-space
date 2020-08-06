@@ -15,7 +15,7 @@ export const Hud = ({ width, height, bySlug, zoomed, loading }) => {
       `}
     >
       ${deck ? html`
-      Name: <a target="_blank" href="${deck.slug}">${deck.name}</a>
+      Name: <a target="_blank" href="${deck.url}">${deck.name}</a>
       <br />
       <img src="${deck.mana_chart_thumbnail}" />
       ` : '' }
