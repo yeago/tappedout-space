@@ -9,7 +9,6 @@ export const fetchDeck = async (slug = defaultSlug) => {
     }
   });
   const json = await response.json();
-  console.log('original json', json);
   // dedupe nodes. one deck per slug.
   const deduped = {
     ...json,
@@ -21,6 +20,5 @@ export const fetchDeck = async (slug = defaultSlug) => {
       return bySlug;
     }, {}))
   };
-  console.log('deduped', deduped);
   return deduped;
 };
