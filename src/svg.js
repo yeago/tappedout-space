@@ -18,13 +18,21 @@ import { useComposeActiveState } from "./use-compose-active-state.js";
 import { LinearGradients } from "./gradients.js";
 
 const useZoomSpring = (ix, iy, ik) => {
-  const x = useSpring2({ fromValue: ix, toValue: ix, stiffness: 120 * 2, damping: 14 * 2, mass: 1 * 2 });
-  const y = useSpring2({ fromValue: iy, toValue: iy, stiffness: 120 * 2, damping: 14 * 2, mass: 1 * 2 });
-  const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 120 * 2, damping: 14 * 3, mass: 1 * 2 });
+  const x = useSpring2({ fromValue: ix, toValue: ix, stiffness: 500, damping: 30, mass: 3 });
+  const y = useSpring2({ fromValue: iy, toValue: iy, stiffness: 500, damping: 30, mass: 3 });
+  const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 250, damping: 20, mass: 2 });
   const update = useCallback((_x, _y, _k) => {
-    x.updateConfig({ toValue: _x });
-    y.updateConfig({ toValue: _y });
-    k.updateConfig({ toValue: _k });
+    const isChangingZoom = k.currentValue !== _k;
+    console.log('isChangingZoom', isChangingZoom);
+    if (!isChangingZoom) {
+      x.updateConfig({ toValue: _x, stiffness: 500, damping: 30 });
+      y.updateConfig({ toValue: _y, stiffness: 500, damping: 30 });
+      k.updateConfig({ toValue: _k, stiffness: 250, damping: 20 });
+    } else {
+      x.updateConfig({ fromValue: _x, toValue: _x, stiffness: 2000, damping: 100000, mass: 30 });
+      y.updateConfig({ fromValue: _y, toValue: _y, stiffness: 2000, damping: 100000 });
+      k.updateConfig({ toValue: _k });
+    }
     x.start();
     y.start();
     k.start();
@@ -35,7 +43,7 @@ const useZoomSpring = (ix, iy, ik) => {
 };
 
 
-export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus }) => {
+export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoomLevel }) => {
   const viewBox = `0 0 ${width} ${height}`;
   const decks = data.nodes;
   const {
@@ -93,7 +101,8 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus }) =>
   const click = useCallback(
     e => {
       const slug = e.target.dataset.slug;
-      if (slug) window.location.hash = slug;
+      const params = window.location.hash.split('?')[1];
+      if (slug) window.location.hash = slug + (params ? '?' + params : '');
       //if (slug) focus(slug);
     },
     [focus, unfocus]
@@ -108,9 +117,12 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus }) =>
     // the larger the factor, the more zoomed out.
     // size = 1 * diameter means that one deck circle will fit the viewport at the smallest dimension.
     // size = 10 * diameter means that ten deck circles can fit the viewport at the smallest dimension.
-    const size = diameter * 10
+    const zScale = scaleLinear().domain([1, 5]).range([15, 8]);
+    const size = diameter * zScale(zoomLevel)
+
     const centerX = xScale(focusedDeck.x);
     const centerY = yScale(focusedDeck.y);
+
     const k = Math.min(width, height) / size; // scale
     const translate = [
       width / 2 - centerX * k,

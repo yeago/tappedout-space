@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from './packages.js';
+import { useEffect, useState, useCallback, useMemo } from './packages.js';
 
 export const useLocationHash = () => {
   const [hash, setHash] = useState(window.location.hash);
@@ -12,4 +12,24 @@ export const useLocationHash = () => {
     };
   }, [onChange]);
   return hash;
+};
+
+export const useLocationHashQueryParams = () => {
+  const hash = useLocationHash();
+  const [head, hashParamString] = hash.split('?');
+  return useMemo(() => {
+    const queryParams = new URLSearchParams(hashParamString);
+    const updateQueryParams = (newParams) => {
+      const newQueryParams = new URLSearchParams(queryParams);
+      Object.entries(newParams).forEach(([key, value]) => {
+        if (value === null) {
+          newQueryParams.delete(key);
+        } else {
+          newQueryParams.set(key, value);
+        }
+      });
+      location.hash = head + '?' + newQueryParams;
+    };
+    return { queryParams, updateQueryParams };
+  }, [hashParamString]);
 };

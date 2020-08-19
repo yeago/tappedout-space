@@ -14,6 +14,7 @@ import { Hud } from "./hud.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
 import { useLocationHash } from "./use-location-hash.js";
 import { useSpace } from "./use-space.js";
+import { useZoomLevels } from "./use-zoom-levels.js";
 
 const styles = css`
   color: white;
@@ -49,6 +50,7 @@ export const App = virtual(() => {
     "FOCUS",
     slug
   );
+  const zoomLevel = useZoomLevels();
 
   useEffect(() => {
     focus(slug);
@@ -85,6 +87,7 @@ export const App = virtual(() => {
         bySlug,
         focused,
         loading: state.loading,
+        zoomLevel
       })}
       ${state.lastLoadedSlug
         ? Svg({
@@ -95,6 +98,7 @@ export const App = virtual(() => {
             focus,
             unfocus,
             bySlug,
+            zoomLevel
           })
         : ""}
     </div>
