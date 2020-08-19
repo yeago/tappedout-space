@@ -45,14 +45,14 @@ export const App = virtual(() => {
   const slug = state.lastLoadingSlug;
   const json = state.lastLoadedSlug && state.bySlug[state.lastLoadedSlug].json;
   const { width, height } = useViewport();
-  const { value: zoomed, on: zoom, reset: unzoom } = useComposeActiveState(
-    "ZOOM",
+  const { value: focused, on: focus, reset: unfocus } = useComposeActiveState(
+    "FOCUS",
     slug
   );
 
   useEffect(() => {
-    zoom(slug);
-  }, [zoom, slug]);
+    focus(slug);
+  }, [focus, slug]);
 
   const decks = json && json.nodes || EMPTY_ARRAY;
 
@@ -83,7 +83,7 @@ export const App = virtual(() => {
         width,
         height,
         bySlug,
-        zoomed,
+        focused,
         loading: state.loading,
       })}
       ${state.lastLoadedSlug
@@ -91,9 +91,9 @@ export const App = virtual(() => {
             width,
             height,
             data: dataWithClusters,
-            zoomed,
-            zoom,
-            unzoom,
+            focused,
+            focus,
+            unfocus,
             bySlug,
           })
         : ""}
