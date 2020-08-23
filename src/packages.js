@@ -1,7 +1,8 @@
-export { svg, render } from 'https://unpkg.com/lit-html@1.2.1/lit-html.js';
-//export { svg, render } from 'https://cdn.skypack.dev/lit-html@^1.2.1';
-export { repeat } from 'https://unpkg.com/lit-html@1.2.1/directives/repeat.js';
-//export { repeat } from 'https://cdn.skypack.dev/lit-html@^1.2.1/directives/repeat.js';
+//export { svg, render } from 'https://unpkg.com/lit-html/lit-html.js';
+export { svg, render } from 'https://unpkg.com/lit-html@1.3.0/lit-html.js';
+//export { svg, render } from 'https://cdn.skypack.dev/lit-html@^1.3.0';
+export { repeat } from 'https://unpkg.com/lit-html@1.3.0/directives/repeat.js';
+//export { repeat } from 'https://cdn.skypack.dev/lit-html@^1.3.0/directives/repeat.js';
 export {
   html,
   component,
