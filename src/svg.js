@@ -115,8 +115,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
     // the larger the factor, the more zoomed out.
     // size = 1 * diameter means that one deck circle will fit the viewport at the smallest dimension.
     // size = 10 * diameter means that ten deck circles can fit the viewport at the smallest dimension.
-    const zScale = scaleLinear().domain([1, 5]).range([15, 8]);
-    const size = diameter * zScale(zoomLevel)
+    const size = 1// diameter * zScale(zoomLevel)
 
     const centerX = xScale(focusedDeck.x);
     const centerY = yScale(focusedDeck.y);
@@ -132,7 +131,8 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
   const { syncedValues, update: updatePanSpring } = usePanSpring(
     ...nextPan
   );
-  const nextZoom = nextPan[2];
+  const zScale = scaleLinear().domain([1, 5]).range([0.2, 1]);
+  const nextZoom = zScale(zoomLevel)
   const { k, update: updateZoomSpring } = useZoomSpring2(nextZoom);
 
   useEffect(() => {
@@ -143,8 +143,10 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
     updateZoomSpring(nextZoom);
   }, [nextZoom]);
 
+  const panK = nextPan[2];
   const [translateX, translateY] = syncedValues;
-  const transform = `translate(${translateX}, ${translateY}) scale(${k})`;
+  const transform = `translate(${translateX}, ${translateY}) scale(${panK})`;
+  const transformScale = `scale(${k})`;
   const circumference = 2 * Math.PI * r;
   return html`
     <svg
@@ -221,6 +223,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
       @click=${click}
     >
       <defs>${LinearGradients(reorderedDecks)}</defs>
+      <g id="view-scale" transform="${transformScale}" transform-origin="${'center'}" class="view">
       <g id="view" transform="${transform}" class="view">
         ${repeat(
           reorderedDecks,
@@ -237,6 +240,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
             });
           }
         )}
+      </g>
       </g>
     </svg>
   `;
