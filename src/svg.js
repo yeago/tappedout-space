@@ -18,20 +18,22 @@ import { useComposeActiveState } from "./use-compose-active-state.js";
 import { LinearGradients } from "./gradients.js";
 
 const useZoomSpring2 = (ik) => {
-  const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 250, damping: 20, mass: 2 });
+  const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 150, damping: 50, mass: 3 });
   const update = useCallback((_k) => {
     k.updateConfig({ toValue: _k });
     k.start();
   }, [k]);
-  return { update, k: k.currentValue };
+  const springs = useMemo(() => [k], [k]);
+  const [currentKValue] = useSprings(springs);
+  return { update, k: currentKValue };
 };
 
 const usePanSpring = (ix, iy) => {
-  const x = useSpring2({ fromValue: ix, toValue: ix, stiffness: 500, damping: 30, mass: 3 });
-  const y = useSpring2({ fromValue: iy, toValue: iy, stiffness: 500, damping: 30, mass: 3 });
+  const x = useSpring2({ fromValue: ix, toValue: ix, stiffness: 100, damping: 50, mass: 10 });
+  const y = useSpring2({ fromValue: iy, toValue: iy, stiffness: 100, damping: 50, mass: 10 });
   const update = useCallback((_x, _y, _k) => {
-    x.updateConfig({ toValue: _x, stiffness: 500, damping: 30 });
-    y.updateConfig({ toValue: _y, stiffness: 500, damping: 30 });
+    x.updateConfig({ toValue: _x });
+    y.updateConfig({ toValue: _y });
     x.start();
     y.start();
   }, [x, y]);
