@@ -28,8 +28,9 @@ export const useLocationHashQueryParams = () => {
           newQueryParams.set(key, value);
         }
       });
+      console.log('head', head);
       location.hash = head + '?' + newQueryParams;
     };
     return { queryParams, updateQueryParams };
-  }, [hashParamString]);
+  }, [hashParamString, head]);
 };
