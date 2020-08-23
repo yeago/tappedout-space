@@ -17,27 +17,25 @@ import { useSprings } from "./use-springs.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
 import { LinearGradients } from "./gradients.js";
 
-const useZoomSpring = (ix, iy, ik) => {
+const useZoomSpring2 = (ik) => {
+  const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 250, damping: 20, mass: 2 });
+  const update = useCallback((_k) => {
+    k.updateConfig({ toValue: _k });
+    k.start();
+  }, [k]);
+  return { update, k: k.currentValue };
+};
+
+const usePanSpring = (ix, iy) => {
   const x = useSpring2({ fromValue: ix, toValue: ix, stiffness: 500, damping: 30, mass: 3 });
   const y = useSpring2({ fromValue: iy, toValue: iy, stiffness: 500, damping: 30, mass: 3 });
-  const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 250, damping: 20, mass: 2 });
   const update = useCallback((_x, _y, _k) => {
-    const isChangingZoom = k.currentValue !== _k;
-    console.log('isChangingZoom', isChangingZoom);
-    if (!isChangingZoom) {
-      x.updateConfig({ toValue: _x, stiffness: 500, damping: 30 });
-      y.updateConfig({ toValue: _y, stiffness: 500, damping: 30 });
-      k.updateConfig({ toValue: _k, stiffness: 250, damping: 20 });
-    } else {
-      x.updateConfig({ fromValue: _x, toValue: _x, stiffness: 2000, damping: 100000, mass: 30 });
-      y.updateConfig({ fromValue: _y, toValue: _y, stiffness: 2000, damping: 100000 });
-      k.updateConfig({ toValue: _k });
-    }
+    x.updateConfig({ toValue: _x, stiffness: 500, damping: 30 });
+    y.updateConfig({ toValue: _y, stiffness: 500, damping: 30 });
     x.start();
     y.start();
-    k.start();
-  }, [x, y, k]);
-  const springs = useMemo(() => { return [x, y, k]; }, [x, y, k]);
+  }, [x, y]);
+  const springs = useMemo(() => { return [x, y]; }, [x, y]);
   const syncedValues = useSprings(springs);
   return { update, syncedValues };
 };
@@ -111,7 +109,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
   const r = 0.1; // radius
   const diameter = r * 2;
 
-  const nextZoom = ((focusedDeck) => {
+  const nextPan = ((focusedDeck) => {
     // returning [0, 0, 1] will fit the entire coordinate space into the svg area, viewing everything. Decks will look tiny.
     if (!focusedDeck) return [0, 0, 1];
     // the larger the factor, the more zoomed out.
@@ -131,14 +129,21 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
     return [...translate, k];
   })(focused && bySlug[focused]);
 
-  const { syncedValues, update: updateZoomSpring } = useZoomSpring(
-    ...nextZoom
+  const { syncedValues, update: updatePanSpring } = usePanSpring(
+    ...nextPan
   );
-  useEffect(() => {
-    updateZoomSpring(...nextZoom);
-  }, [...nextZoom]);
+  const nextZoom = nextPan[2];
+  const { k, update: updateZoomSpring } = useZoomSpring2(nextZoom);
 
-  const [translateX, translateY, k] = syncedValues;
+  useEffect(() => {
+    updatePanSpring(...nextPan);
+  }, [...nextPan]);
+
+  useEffect(() => {
+    updateZoomSpring(nextZoom);
+  }, [nextZoom]);
+
+  const [translateX, translateY] = syncedValues;
   const transform = `translate(${translateX}, ${translateY}) scale(${k})`;
   const circumference = 2 * Math.PI * r;
   return html`
