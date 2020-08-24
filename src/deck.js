@@ -14,7 +14,7 @@ const votesSize = (votes) => {
   return 'small'
 }
 
-export const Deck = ({ deck, cx, cy, highlighted, zoomed, r, circumference }) => {
+export const Deck = ({ deck, cx, cy, highlighted, focused, r, circumference }) => {
   const cluster = parseCluster(deck.cluster);
   const gradient = `grad_${deck.mana_colors.join('')}`;
   return svg`
@@ -26,9 +26,9 @@ export const Deck = ({ deck, cx, cy, highlighted, zoomed, r, circumference }) =>
         data-slug="${deck.slug}"
         id="deck-${deck.slug}"
         data-highlighted=${highlighted}
-        data-zoomed=${zoomed}
+        data-focused=${focused}
         data-votes-size=${votesSize(deck.votes)}
-        fill=${`url(#${gradient})`}
+        fill=${`url(${window.location.pathname}#${gradient})`}
       />
     </g>
   `;

@@ -14,6 +14,7 @@ import { Hud } from "./hud.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
 import { useLocationHash } from "./use-location-hash.js";
 import { useSpace } from "./use-space.js";
+import { useZoomLevels } from "./use-zoom-levels.js";
 
 const styles = css`
   color: white;
@@ -45,14 +46,15 @@ export const App = virtual(() => {
   const slug = state.lastLoadingSlug;
   const json = state.lastLoadedSlug && state.bySlug[state.lastLoadedSlug].json;
   const { width, height } = useViewport();
-  const { value: zoomed, on: zoom, reset: unzoom } = useComposeActiveState(
-    "ZOOM",
+  const { value: focused, on: focus, reset: unfocus } = useComposeActiveState(
+    "FOCUS",
     slug
   );
+  const zoomLevel = useZoomLevels();
 
   useEffect(() => {
-    zoom(slug);
-  }, [zoom, slug]);
+    focus(slug);
+  }, [focus, slug]);
 
   const decks = json && json.nodes || EMPTY_ARRAY;
 
@@ -83,18 +85,20 @@ export const App = virtual(() => {
         width,
         height,
         bySlug,
-        zoomed,
+        focused,
         loading: state.loading,
+        zoomLevel
       })}
       ${state.lastLoadedSlug
         ? Svg({
             width,
             height,
             data: dataWithClusters,
-            zoomed,
-            zoom,
-            unzoom,
+            focused,
+            focus,
+            unfocus,
             bySlug,
+            zoomLevel
           })
         : ""}
     </div>
