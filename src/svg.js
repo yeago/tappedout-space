@@ -15,27 +15,35 @@ import { Deck } from "./deck.js";
 import { useSpring, useSpring2 } from "./use-spring.js";
 import { useSprings } from "./use-springs.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
-import { LinearGradients } from "./gradients.js";
+import { Gradients } from "./gradients.js";
 
-const useZoomSpring = (ix, iy, ik) => {
-  const x = useSpring2({ fromValue: ix, toValue: ix, stiffness: 120 * 2, damping: 14 * 2, mass: 1 * 2 });
-  const y = useSpring2({ fromValue: iy, toValue: iy, stiffness: 120 * 2, damping: 14 * 2, mass: 1 * 2 });
-  const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 120 * 2, damping: 14 * 3, mass: 1 * 2 });
+const useZoomSpring = (ik) => {
+  const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 150, damping: 50, mass: 3 });
+  const update = useCallback((_k) => {
+    k.updateConfig({ toValue: _k });
+    k.start();
+  }, [k]);
+  const springs = useMemo(() => [k], [k]);
+  const [currentKValue] = useSprings(springs);
+  return { update, k: currentKValue };
+};
+
+const usePanSpring = (ix, iy) => {
+  const x = useSpring2({ fromValue: ix, toValue: ix, stiffness: 100, damping: 50, mass: 10 });
+  const y = useSpring2({ fromValue: iy, toValue: iy, stiffness: 100, damping: 50, mass: 10 });
   const update = useCallback((_x, _y, _k) => {
     x.updateConfig({ toValue: _x });
     y.updateConfig({ toValue: _y });
-    k.updateConfig({ toValue: _k });
     x.start();
     y.start();
-    k.start();
-  }, [x, y, k]);
-  const springs = useMemo(() => { return [x, y, k]; }, [x, y, k]);
+  }, [x, y]);
+  const springs = useMemo(() => { return [x, y]; }, [x, y]);
   const syncedValues = useSprings(springs);
   return { update, syncedValues };
 };
 
 
-export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
+export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoomLevel }) => {
   const viewBox = `0 0 ${width} ${height}`;
   const decks = data.nodes;
   const {
@@ -59,15 +67,15 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
     return { xValues, yValues, xScale, yScale };
   }, [decks, width, height]);
   const reorderedDecks = useMemo(() => {
-    if (highlighted || zoomed) {
+    if (highlighted || focused) {
       const hDeck = bySlug[highlighted];
-      const zDeck = bySlug[zoomed];
+      const zDeck = bySlug[focused];
       const reordered = decks.slice();
       if (highlighted) {
         reordered.splice(reordered.indexOf(hDeck), 1);
         reordered.push(hDeck);
       }
-      if (zoomed) {
+      if (focused) {
         reordered.splice(reordered.indexOf(zDeck), 1);
         reordered.push(zDeck);
       }
@@ -75,7 +83,7 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
     } else {
       return decks;
     }
-  }, [decks, highlighted, zoomed, bySlug]);
+  }, [decks, highlighted, focused, bySlug]);
   const mouseover = useCallback(
     e => {
       const slug = e.target.dataset.slug;
@@ -92,42 +100,56 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
   );
   const click = useCallback(
     e => {
+      e.preventDefault();
       const slug = e.target.dataset.slug;
-      if (slug) window.location.hash = slug;
-      //if (slug) zoom(slug);
+      const params = window.location.hash.split('?')[1];
+      if (slug) window.location.hash = slug + (params ? '?' + params : '');
+      //if (slug) focus(slug);
     },
-    [zoom, unzoom]
+    [focus, unfocus]
   );
-  // r = 1 is equal to 1px while completely zoomed out, when the coordinate space is entirely in view.
+  // r = 1 is equal to 1px while completely focused out, when the coordinate space is entirely in view.
   const r = 0.1; // radius
   const diameter = r * 2;
 
-  const nextZoom = ((r, zoomedDeck) => {
+  const nextPan = ((focusedDeck) => {
     // returning [0, 0, 1] will fit the entire coordinate space into the svg area, viewing everything. Decks will look tiny.
-    if (!zoomedDeck) return [0, 0, 1];
+    if (!focusedDeck) return [0, 0, 1];
     // the larger the factor, the more zoomed out.
     // size = 1 * diameter means that one deck circle will fit the viewport at the smallest dimension.
     // size = 10 * diameter means that ten deck circles can fit the viewport at the smallest dimension.
-    const size = diameter * 10
-    const centerX = xScale(zoomedDeck.x);
-    const centerY = yScale(zoomedDeck.y);
+    const size = 1// diameter * zScale(zoomLevel)
+
+    const centerX = xScale(focusedDeck.x);
+    const centerY = yScale(focusedDeck.y);
+
     const k = Math.min(width, height) / size; // scale
     const translate = [
       width / 2 - centerX * k,
       height / 2 - centerY * k
     ];
     return [...translate, k];
-  })(r, zoomed && bySlug[zoomed]);
+  })(focused && bySlug[focused]);
 
-  const { syncedValues, update: updateZoomSpring } = useZoomSpring(
-    ...nextZoom
+  const { syncedValues, update: updatePanSpring } = usePanSpring(
+    ...nextPan
   );
-  useEffect(() => {
-    updateZoomSpring(...nextZoom);
-  }, [...nextZoom]);
+  const zScale = scaleLinear().domain([1, 5]).range([0.2, 1]);
+  const nextZoom = zScale(zoomLevel)
+  const { k, update: updateZoomSpring } = useZoomSpring(nextZoom);
 
-  const [translateX, translateY, k] = syncedValues;
-  const transform = `translate(${translateX}, ${translateY}) scale(${k})`;
+  useEffect(() => {
+    updatePanSpring(...nextPan);
+  }, [...nextPan]);
+
+  useEffect(() => {
+    updateZoomSpring(nextZoom);
+  }, [nextZoom]);
+
+  const panK = nextPan[2];
+  const [translateX, translateY] = syncedValues;
+  const transform = `translate(${translateX}, ${translateY}) scale(${panK})`;
+  const transformScale = `scale(${k})`;
   const circumference = 2 * Math.PI * r;
   return html`
     <svg
@@ -161,7 +183,7 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
             stroke-width: calc(var(--r) / 7);
           }
 
-          &[data-zoomed="true"], &:active {
+          &[data-focused="true"], &:active {
             stroke: white;
             stroke-width: calc(var(--r) / 5);
           }
@@ -203,7 +225,8 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
       @mouseout=${mouseout}
       @click=${click}
     >
-      <defs>${LinearGradients(reorderedDecks)}</defs>
+      <defs>${Gradients(decks)}</defs>
+      <g id="view-scale" transform="${transformScale}" transform-origin="center" class="view">
       <g id="view" transform="${transform}" class="view">
         ${repeat(
           reorderedDecks,
@@ -215,11 +238,12 @@ export const Svg = ({ bySlug, data, width, height, zoomed, zoom, unzoom }) => {
               cy: yScale(deck.y),
               r,
               highlighted: deck.slug === highlighted,
-              zoomed: deck.slug === zoomed,
+              focused: deck.slug === focused,
               circumference
             });
           }
         )}
+      </g>
       </g>
     </svg>
   `;

@@ -58,7 +58,7 @@ export const useSpace = () => {
   useEffect(async () => {
     if (!hash) window.location.hash = defaultSlug;
     if (hash) {
-      const slug = hash.replace("#", "");
+      const slug = hash.replace("#", "").split("?")[0];
       dispatch({ type: "load", slug });
       const json = await fetchDeck(slug);
       dispatch({ type: "loaded", json, slug });
