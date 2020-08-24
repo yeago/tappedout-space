@@ -15,7 +15,7 @@ import { Deck } from "./deck.js";
 import { useSpring, useSpring2 } from "./use-spring.js";
 import { useSprings } from "./use-springs.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
-import { LinearGradients } from "./gradients.js";
+import { Gradients } from "./gradients.js";
 
 const useZoomSpring2 = (ik) => {
   const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 150, damping: 50, mass: 3 });
@@ -224,7 +224,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
       @mouseout=${mouseout}
       @click=${click}
     >
-      <defs>${LinearGradients(reorderedDecks)}</defs>
+      <defs>${Gradients(reorderedDecks)}</defs>
       <g id="view-scale" transform="${transformScale}" transform-origin="${'center'}" class="view">
       <g id="view" transform="${transform}" class="view">
         ${repeat(

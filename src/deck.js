@@ -28,7 +28,7 @@ export const Deck = ({ deck, cx, cy, highlighted, focused, r, circumference }) =
         data-highlighted=${highlighted}
         data-focused=${focused}
         data-votes-size=${votesSize(deck.votes)}
-        fill=${`url(#${gradient})`}
+        fill=${`url(${window.location.pathname}#${gradient})`}
       />
     </g>
   `;

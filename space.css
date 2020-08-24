@@ -5,6 +5,8 @@
   box-sizing: border-box;
 }
 html, body, #root {
+  /*background: radial-gradient(ellipse at top, #999, #111), radial-gradient(ellipse at bottom, #111, #999);*/
+  /*background: linear-gradient(#302550, #1f0c3e);*/
   background-color: var(--stage-background-color);
   margin: 0;
   padding: 0;
