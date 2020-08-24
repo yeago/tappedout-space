@@ -7,7 +7,7 @@ import { render } from "./src/packages.js";
 //console.log(data.nodes.map(d => d.mana_colors));
 render(
   App(),
-  document.getElementById("root")
+  document.getElementById("space-root")
 );
 
 //fetchDeck();
