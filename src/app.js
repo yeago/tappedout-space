@@ -15,6 +15,7 @@ import { useComposeActiveState } from "./use-compose-active-state.js";
 import { useLocationHash } from "./use-location-hash.js";
 import { useSpace } from "./use-space.js";
 import { useZoomLevels } from "./use-zoom-levels.js";
+import { ZoomControls } from "./zoom-controls.js";
 
 const styles = css`
   color: white;
@@ -89,6 +90,7 @@ export const App = virtual(() => {
         loading: state.loading,
         zoomLevel
       })}
+      ${ZoomControls()}
       ${state.lastLoadedSlug
         ? Svg({
             width,
