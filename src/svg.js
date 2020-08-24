@@ -17,7 +17,7 @@ import { useSprings } from "./use-springs.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
 import { Gradients } from "./gradients.js";
 
-const useZoomSpring2 = (ik) => {
+const useZoomSpring = (ik) => {
   const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 150, damping: 50, mass: 3 });
   const update = useCallback((_k) => {
     k.updateConfig({ toValue: _k });
@@ -135,7 +135,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
   );
   const zScale = scaleLinear().domain([1, 5]).range([0.2, 1]);
   const nextZoom = zScale(zoomLevel)
-  const { k, update: updateZoomSpring } = useZoomSpring2(nextZoom);
+  const { k, update: updateZoomSpring } = useZoomSpring(nextZoom);
 
   useEffect(() => {
     updatePanSpring(...nextPan);
@@ -224,7 +224,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
       @mouseout=${mouseout}
       @click=${click}
     >
-      <defs>${Gradients(reorderedDecks)}</defs>
+      <defs>${Gradients(decks)}</defs>
       <g id="view-scale" transform="${transformScale}" transform-origin="${'center'}" class="view">
       <g id="view" transform="${transform}" class="view">
         ${repeat(
