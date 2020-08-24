@@ -100,6 +100,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
   );
   const click = useCallback(
     e => {
+      e.preventDefault();
       const slug = e.target.dataset.slug;
       const params = window.location.hash.split('?')[1];
       if (slug) window.location.hash = slug + (params ? '?' + params : '');
@@ -225,7 +226,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
       @click=${click}
     >
       <defs>${Gradients(decks)}</defs>
-      <g id="view-scale" transform="${transformScale}" transform-origin="${'center'}" class="view">
+      <g id="view-scale" transform="${transformScale}" transform-origin="center" class="view">
       <g id="view" transform="${transform}" class="view">
         ${repeat(
           reorderedDecks,
