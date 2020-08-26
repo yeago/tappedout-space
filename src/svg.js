@@ -134,7 +134,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
   const { syncedValues, update: updatePanSpring } = usePanSpring(
     ...nextPan
   );
-  const zScale = scaleLinear().domain([1, 5]).range([0.2, 1]);
+  const zScale = scaleLinear().domain([1, 5]).range([0.15, 1]);
   const nextZoom = zScale(zoomLevel)
   const { k, update: updateZoomSpring } = useZoomSpring(nextZoom);
 
