@@ -15,7 +15,6 @@ export const Hud = ({ width, height, bySlug, focused, loading, zoomLevel }) => {
     >
       ${deck ? html`
       Name: <a class="link" target="_blank" href="${deck.url}">${deck.name}</a>
-
       <br />
       <img src="${deck.mana_chart_thumbnail}" />
       ` : '' }
