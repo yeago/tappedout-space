@@ -1,8 +1,8 @@
 export const defaultSlug = window.django.deckSlug;
 
 export const fetchDeck = async (slug = defaultSlug) => {
-  //console.log('fetchDeck called with', slug);
-  const url = `https://tappedout.net/api/decks/${slug}/space/`;
+  const params = window.location.hostname === 'localhost' ? '?token=deleteme99' : '';
+  const url = `https://tappedout.net/api/decks/${slug}/space/${params}`;
   const response = await fetch(url, {
     headers: {
       Accept: "application/json, text/plain, */*"

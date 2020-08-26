@@ -10,13 +10,13 @@ const DEFAULT_ZOOM_LEVEL = 5;
 const initialState = 0;
 
 
-const clamp = (value, min, max) => {
+export const clamp = (value, min, max) => {
   const lowerLimitApplied = Math.max(value, min);
   const upperLimitApplied = Math.min(lowerLimitApplied, max);
   return upperLimitApplied;
 };
 
-const getZoomLevel = queryParams => {
+export const getZoomLevel = queryParams => {
   const zoomLevelQueryParam = queryParams.get('zoom');
   if (zoomLevelQueryParam) {
     const parsed = Number(zoomLevelQueryParam);
