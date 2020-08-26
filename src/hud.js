@@ -16,7 +16,6 @@ export const Hud = ({ width, height, bySlug, focused, loading, zoomLevel }) => {
       ${deck ? html`
       Name: <a class="link" target="_blank" href="${deck.slug}">${deck.name}</a>
       <br />
-      ${location.host.includes('localhost') ? html`<br />zoom level: ${zoomLevel}<br />` : '' }
       <img src="${deck.mana_chart_thumbnail}" />
       ` : '' }
       ${loading ? html`<br /><br />Loading...<br />` : '' }
