@@ -21,7 +21,7 @@
     "lit-html": "1.4.1",
     "haunted": "4.8.1",
     "emotion": "^10.0.27",
-    "d3-scale": "3.2.1",
-    "d3-interpolate": "1.4.0"
+    "d3-scale": "4.0.2",
+    "d3-interpolate": "3.0.1"
   }
 }
