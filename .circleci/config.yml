@@ -4,7 +4,12 @@ jobs:
     docker:
       - image: cimg/node:22.11
     steps:
-      - checkout
+      # The repo is public, so clone over HTTPS: no CircleCI deploy key to keep in sync with GitHub.
+      - run:
+          name: Checkout code
+          command: |
+            git clone --filter=blob:none "https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git" .
+            git checkout -q "$CIRCLE_SHA1"
       - restore_cache:
           keys:
             - npm-v1-{{ checksum "package.json" }}
