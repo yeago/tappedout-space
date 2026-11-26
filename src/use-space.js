@@ -22,7 +22,9 @@ const loadingReducer = (state, action) => {
   return {
     ...state,
     loading,
-    lastLoadedSlug: action.slug,
+    // Only the deck being asked for now becomes the one shown; a late reply for a deck
+    // the visitor already left is kept but not displayed.
+    lastLoadedSlug: isFinishedLoading ? action.slug : state.lastLoadedSlug,
     bySlug
   };
 };

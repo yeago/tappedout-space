@@ -25,21 +25,6 @@ const styles = css`
   width: 100%;
 `;
 
-//let minX = 0, maxX = 0, minY = 0, maxY = 0;
-let { minX, maxX, minY, maxY } = localStorage.getItem("bounds")
-  ? JSON.parse(localStorage.getItem("bounds"))
-  : { minX: 0, maxX: 0, minY: 0, maxY: 0 };
-const detectBounds = (nodes) => {
-  for (const node of nodes) {
-    if (node.x < minX) minX = node.x;
-    if (node.x > maxX) maxX = node.x;
-    if (node.y < minY) minY = node.y;
-    if (node.y > maxY) maxY = node.y;
-  }
-  const bounds = { minX, maxX, minY, maxY };
-  localStorage.setItem("bounds", JSON.stringify(bounds));
-};
-
 const EMPTY_ARRAY = [];
 
 export const App = virtual(() => {
@@ -58,8 +43,6 @@ export const App = virtual(() => {
   }, [focus, slug]);
 
   const decks = json && json.nodes || EMPTY_ARRAY;
-
-  detectBounds(decks);
 
   const decksWithClusters = useMemo(() => {
     return decks.filter((deck) => deck.cluster);
