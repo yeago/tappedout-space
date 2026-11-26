@@ -55,14 +55,17 @@ const reducer = (state, action) => {
 export const useSpace = () => {
   const hash = useLocationHash();
   const [state, dispatch] = useReducer(reducer, initialState);
+  // The hash also carries view settings (e.g. "#my-deck?zoom=3"), and every zoom step
+  // rewrites it. Only a different deck needs a fetch, so depend on the slug alone.
+  const slug = hash ? hash.replace("#", "").split("?")[0] : "";
   useEffect(async () => {
-    if (!hash) window.location.hash = defaultSlug;
-    if (hash) {
-      const slug = hash.replace("#", "").split("?")[0];
-      dispatch({ type: "load", slug });
-      const json = await fetchDeck(slug);
-      dispatch({ type: "loaded", json, slug });
+    if (!slug) {
+      window.location.hash = defaultSlug;
+      return;
     }
-  }, [hash]);
+    dispatch({ type: "load", slug });
+    const json = await fetchDeck(slug);
+    dispatch({ type: "loaded", json, slug });
+  }, [slug]);
   return state;
 };
