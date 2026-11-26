@@ -9,8 +9,8 @@ const sum = (...values) => {
 };
 
 const votesSize = (votes) => {
-  if (votes > 3) return 'medium';
   if (votes > 10) return 'large';
+  if (votes > 3) return 'medium';
   return 'small'
 }
 

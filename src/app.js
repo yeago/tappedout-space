@@ -88,6 +88,7 @@ export const App = virtual(() => {
         bySlug,
         focused,
         loading: state.loading,
+        error: state.error,
         zoomLevel
       })}
       ${ZoomControls()}

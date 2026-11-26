@@ -9,6 +9,7 @@ const initialState = {
   lastLoadingSlug: location.hash.replace('#', ''),
   lastLoadedSlug: null,
   loading: false,
+  error: null,
 };
 
 const loadingReducer = (state, action) => {
@@ -27,7 +28,7 @@ const loadingReducer = (state, action) => {
 };
 
 const loadReducer = (state, action) => {
-  const isPresent = action.slug in state.bySlug;
+  const isPresent = action.slug in state.bySlug && !state.bySlug[action.slug].error;
   const bySlug = isPresent ? state.bySlug : {
     ...state.bySlug,
     [action.slug]: { loading: true, json: null, slug: action.slug },
@@ -36,7 +37,21 @@ const loadReducer = (state, action) => {
     ...state,
     loading: bySlug[action.slug].loading,
     lastLoadingSlug: action.slug,
+    error: null,
     bySlug
+  };
+};
+
+const failedReducer = (state, action) => {
+  const isCurrent = state.lastLoadingSlug === action.slug;
+  return {
+    ...state,
+    loading: isCurrent ? false : state.loading,
+    error: isCurrent ? action.message : state.error,
+    bySlug: {
+      ...state.bySlug,
+      [action.slug]: { loading: false, json: null, slug: action.slug, error: action.message }
+    }
   };
 };
 
@@ -47,6 +62,9 @@ const reducer = (state, action) => {
     }
     case `loaded`: {
       return loadingReducer(state, action);
+    }
+    case `failed`: {
+      return failedReducer(state, action);
     }
   }
   return state;
@@ -64,8 +82,12 @@ export const useSpace = () => {
       return;
     }
     dispatch({ type: "load", slug });
-    const json = await fetchDeck(slug);
-    dispatch({ type: "loaded", json, slug });
+    try {
+      const json = await fetchDeck(slug);
+      dispatch({ type: "loaded", json, slug });
+    } catch (e) {
+      dispatch({ type: "failed", message: e.message, slug });
+    }
   }, [slug]);
   return state;
 };
