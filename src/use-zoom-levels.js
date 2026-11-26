@@ -25,6 +25,23 @@ export const getZoomLevel = queryParams => {
   return DEFAULT_ZOOM_LEVEL;
 };
 
+// A trackpad swipe fires dozens of wheel events; a mouse notch fires one. Step the zoom
+// when a new gesture starts (a pause between events), and at most every STEP_MS during
+// a long one, so a single swipe doesn't run straight to the min or max zoom.
+const GESTURE_GAP_MS = 200;
+const STEP_MS = 400;
+let lastWheelAt = 0;
+let lastStepAt = 0;
+const shouldStep = (now) => {
+  const newGesture = now - lastWheelAt > GESTURE_GAP_MS;
+  lastWheelAt = now;
+  if (newGesture || now - lastStepAt > STEP_MS) {
+    lastStepAt = now;
+    return true;
+  }
+  return false;
+};
+
 export const useZoomLevels = () => {
   const { queryParams, updateQueryParams } = useLocationHashQueryParams();
   //const [state, dispatch] = useReducer(reducer, initialState);
@@ -39,9 +56,8 @@ export const useZoomLevels = () => {
 
   useEffect(() => {
     const handleWheel = e => {
-      const delta = Math.sign(e.deltaY);
-      // console.log(delta);// delta is either -1 or 1
-      handleDelta(delta);
+      const delta = Math.sign(e.deltaY);  // -1 or 1; 0 for a sideways scroll
+      if (delta && shouldStep(Date.now())) handleDelta(delta);
     };
     window.addEventListener("wheel", handleWheel);
     return () => {

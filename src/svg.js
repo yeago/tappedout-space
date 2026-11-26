@@ -43,6 +43,19 @@ const usePanSpring = (ix, iy) => {
 };
 
 
+// The API leaves out limit_coordinates when the recommender couldn't send them (slow, or
+// resting after a timeout); fall back to the bounds of the decks we did get.
+const spaceLimits = (limits, xValues, yValues) => {
+  if (limits && limits.min_coordinates && limits.max_coordinates) {
+    return { min: limits.min_coordinates, max: limits.max_coordinates };
+  }
+  if (!xValues.length) return { min: { x: 0, y: 0 }, max: { x: 1, y: 1 } };
+  return {
+    min: { x: Math.min(...xValues), y: Math.min(...yValues) },
+    max: { x: Math.max(...xValues), y: Math.max(...yValues) },
+  };
+};
+
 export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoomLevel }) => {
   const viewBox = `0 0 ${width} ${height}`;
   const decks = data.nodes;
@@ -54,14 +67,13 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
   const { xValues, yValues, xScale, yScale } = useMemo(() => {
     const xValues = decks.map(({ x }) => x);
     const yValues = decks.map(({ y }) => y);
+    const { min, max } = spaceLimits(data.limit_coordinates, xValues, yValues);
     const xScale = scaleLinear()
-      .domain([data.limit_coordinates.min_coordinates.x,
-               data.limit_coordinates.max_coordinates.x])
+      .domain([min.x, max.x])
       //.domain([0, 13.524832725524902])
       .range([0, width]);
     const yScale = scaleLinear()
-      .domain([data.limit_coordinates.min_coordinates.y,
-               data.limit_coordinates.max_coordinates.y])
+      .domain([min.y, max.y])
       //.domain([-0.23971568048000336, 4.435561180114746])
       .range([height, 0]);
     return { xValues, yValues, xScale, yScale };

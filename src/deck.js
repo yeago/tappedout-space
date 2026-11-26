@@ -1,21 +1,12 @@
 import { svg } from "./packages.js";
 
-import { parseCluster } from "./parse-cluster.js";
-
-const add = (a, b) => a + b;
-
-const sum = (...values) => {
-  return values.reduce(add, 0);
-};
-
 const votesSize = (votes) => {
-  if (votes > 3) return 'medium';
   if (votes > 10) return 'large';
+  if (votes > 3) return 'medium';
   return 'small'
 }
 
 export const Deck = ({ deck, cx, cy, highlighted, focused, r, circumference }) => {
-  const cluster = parseCluster(deck.cluster);
   const gradient = `grad_${deck.mana_colors.join('')}`;
   return svg`
     <g>

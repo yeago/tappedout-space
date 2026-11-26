@@ -1,6 +1,6 @@
 import { html, css } from "./packages.js";
 
-export const Hud = ({ width, height, bySlug, focused, loading, zoomLevel }) => {
+export const Hud = ({ width, height, bySlug, focused, loading, error, zoomLevel }) => {
   const deck = bySlug[focused];
   return html`
     <div
@@ -19,6 +19,7 @@ export const Hud = ({ width, height, bySlug, focused, loading, zoomLevel }) => {
       <img src="${deck.mana_chart_thumbnail}" />
       ` : '' }
       ${loading ? html`<br /><br />Loading...<br />` : '' }
+      ${error ? html`<br /><br />${error}<br />` : '' }
     </div>
   `;
 };

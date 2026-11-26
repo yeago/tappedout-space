@@ -9,6 +9,7 @@ const initialState = {
   lastLoadingSlug: location.hash.replace('#', ''),
   lastLoadedSlug: null,
   loading: false,
+  error: null,
 };
 
 const loadingReducer = (state, action) => {
@@ -21,13 +22,15 @@ const loadingReducer = (state, action) => {
   return {
     ...state,
     loading,
-    lastLoadedSlug: action.slug,
+    // Only the deck being asked for now becomes the one shown; a late reply for a deck
+    // the visitor already left is kept but not displayed.
+    lastLoadedSlug: isFinishedLoading ? action.slug : state.lastLoadedSlug,
     bySlug
   };
 };
 
 const loadReducer = (state, action) => {
-  const isPresent = action.slug in state.bySlug;
+  const isPresent = action.slug in state.bySlug && !state.bySlug[action.slug].error;
   const bySlug = isPresent ? state.bySlug : {
     ...state.bySlug,
     [action.slug]: { loading: true, json: null, slug: action.slug },
@@ -36,7 +39,21 @@ const loadReducer = (state, action) => {
     ...state,
     loading: bySlug[action.slug].loading,
     lastLoadingSlug: action.slug,
+    error: null,
     bySlug
+  };
+};
+
+const failedReducer = (state, action) => {
+  const isCurrent = state.lastLoadingSlug === action.slug;
+  return {
+    ...state,
+    loading: isCurrent ? false : state.loading,
+    error: isCurrent ? action.message : state.error,
+    bySlug: {
+      ...state.bySlug,
+      [action.slug]: { loading: false, json: null, slug: action.slug, error: action.message }
+    }
   };
 };
 
@@ -48,6 +65,9 @@ const reducer = (state, action) => {
     case `loaded`: {
       return loadingReducer(state, action);
     }
+    case `failed`: {
+      return failedReducer(state, action);
+    }
   }
   return state;
 };
@@ -55,14 +75,21 @@ const reducer = (state, action) => {
 export const useSpace = () => {
   const hash = useLocationHash();
   const [state, dispatch] = useReducer(reducer, initialState);
+  // The hash also carries view settings (e.g. "#my-deck?zoom=3"), and every zoom step
+  // rewrites it. Only a different deck needs a fetch, so depend on the slug alone.
+  const slug = hash ? hash.replace("#", "").split("?")[0] : "";
   useEffect(async () => {
-    if (!hash) window.location.hash = defaultSlug;
-    if (hash) {
-      const slug = hash.replace("#", "").split("?")[0];
-      dispatch({ type: "load", slug });
+    if (!slug) {
+      window.location.hash = defaultSlug;
+      return;
+    }
+    dispatch({ type: "load", slug });
+    try {
       const json = await fetchDeck(slug);
       dispatch({ type: "loaded", json, slug });
+    } catch (e) {
+      dispatch({ type: "failed", message: e.message, slug });
     }
-  }, [hash]);
+  }, [slug]);
   return state;
 };
