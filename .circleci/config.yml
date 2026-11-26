@@ -1,17 +1,27 @@
 version: 2.1
-orbs:
-  node: circleci/node@1.1.6
 jobs:
   build-and-test:
-    executor:
-      name: node/default
+    docker:
+      - image: cimg/node:22.11
     steps:
       - checkout
-      - node/with-cache:
-          steps:
-            - run: npm install
-            - run: npm test
+      - restore_cache:
+          keys:
+            - npm-v1-{{ checksum "package.json" }}
+      - run: npm install
+      - save_cache:
+          key: npm-v1-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      # There are no unit tests yet: at least make sure every module parses.
+      - run:
+          name: Check every module parses
+          command: |
+            npm install --no-save acorn@8.14.0
+            for f in index.js src/*.js; do
+              npx acorn --ecma2022 --module --silent "$f" || { echo "Syntax error in $f"; exit 1; }
+            done
 workflows:
-    build-and-test:
-      jobs:
-        - build-and-test
+  build-and-test:
+    jobs:
+      - build-and-test
