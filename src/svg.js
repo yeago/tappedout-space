@@ -212,32 +212,51 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
             --r-scale: 1;
           }
         }
+        .focus-halo {
+          pointer-events: none;
+        }
+        .focus-ring {
+          pointer-events: none;
+          fill: none;
+          stroke: #e4e0ff;
+          stroke-width: calc(var(--r) / 8);
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: focus-pulse 2.6s ease-in-out infinite;
+        }
+        @keyframes focus-pulse {
+          0%, 100% { opacity: .85; transform: scale(1); }
+          50% { opacity: .3; transform: scale(1.5); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .focus-ring { animation: none; }
+        }
         .view {
           will-change: transform;
           xtransition: transform 0.7s ease-in-out;
         }
 
         .stop-B {
-          stop-color: black;
+          stop-color: #9a7fb5;
         }
         .stop-U {
-          stop-color: blue;
+          stop-color: #3d8fe0;
         }
         .stop-R {
-          stop-color: red;
+          stop-color: #e2503f;
         }
         .stop-G {
-          stop-color: green;
+          stop-color: #37a96b;
         }
         .stop-W {
-          stop-color: white;
+          stop-color: #f3e6b4;
         }
       `}"
       @mouseover=${mouseover}
       @mouseout=${mouseout}
       @click=${click}
     >
-      <defs>${Gradients(decks)}</defs>
+      <defs>${Gradients(decks)}<radialGradient id="focus_halo"><stop offset="0" stop-color="#a096ff" stop-opacity=".55"/><stop offset="1" stop-color="#a096ff" stop-opacity="0"/></radialGradient></defs>
       <g id="view-scale" transform="${transformScale}" transform-origin="center" class="view">
       <g id="view" transform="${transform}" class="view">
         ${repeat(
