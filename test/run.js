@@ -69,6 +69,41 @@ test('panFor: no neighbours yet, centres on the deck even at zoom 1', async (pag
   assert.deepStrictEqual([tx, ty], [100 - 30 * 100, 50 - 90 * 100]);
 });
 
+// ---- zoomScaleFor / deckRadiusFor ----------------------------------------------------------------
+// Same easy scales as panFor's cases: map units x10 -> px, viewport 200x100, panFor's k = min(w, h) = 100.
+const zoomCase = async (page, fn, args) => {
+  if (page.url() === 'about:blank') await page.goto(`http://localhost:${server.address().port}/blank`);
+  return page.evaluate(async ([fn, args]) => {
+    const mod = await import('/src/pan.js');
+    const xScale = (v) => v * 10;
+    const yScale = (v) => 100 - v * 10;
+    return mod[fn]({ xScale, yScale, width: 200, height: 100, k: 100, ...args });
+  }, [fn, args]);
+};
+
+test('zoomScaleFor: a tight neighbourhood keeps the old range (0.15 at zoom 1, 1 at zoom 5)', async (page) => {
+  const tight = { xValues: [5, 5.01], yValues: [5, 5.01] };
+  assert.strictEqual(await zoomCase(page, 'zoomScaleFor', { zoomLevel: 5, ...tight }), 1);
+  assert.ok(Math.abs(await zoomCase(page, 'zoomScaleFor', { zoomLevel: 1, ...tight }) - 0.15) < 1e-9);
+});
+
+test('zoomScaleFor: zoom 1 fits a widely spread neighbourhood, and the levels step evenly', async (page) => {
+  // Span 4 units = 40 px across, 60 px tall; with the 1.2 margin it fits at min(200/48, 100/72)/100.
+  const wide = { xValues: [1, 5], yValues: [1, 7] };
+  const z1 = await zoomCase(page, 'zoomScaleFor', { zoomLevel: 1, ...wide });
+  assert.ok(Math.abs(z1 - (100 / 72) / 100) < 1e-9, `zoom 1 was ${z1}`);
+  const zs = [];
+  for (const zoomLevel of [1, 2, 3, 4, 5]) zs.push(await zoomCase(page, 'zoomScaleFor', { zoomLevel, ...wide }));
+  const ratios = zs.slice(1).map((z, i) => z / zs[i]);
+  ratios.forEach((r) => assert.ok(Math.abs(r - ratios[0]) < 1e-9, `uneven steps ${ratios}`));
+});
+
+test('deckRadiusFor: normal radius at usual zooms, larger only when decks would be under 5 px', async (page) => {
+  assert.strictEqual(await zoomCase(page, 'deckRadiusFor', { k: 800, zoom: 0.15 }), 0.1);
+  const r = await zoomCase(page, 'deckRadiusFor', { k: 800, zoom: 0.001 });
+  assert.ok(Math.abs(r * 800 * 0.001 * 2 - 5) < 1e-9, `drawn ${r * 800 * 0.001 * 2} px`);
+});
+
 // ---- the loading freeze ----------------------------------------------------------------------
 test('loading: an overlay covers the map and swallows clicks and the wheel; one request per deck', async (page) => {
   const requested = [];
