@@ -18,8 +18,6 @@ export const Hud = ({ width, height, bySlug, focused, loading, error, zoomLevel 
       <br />
       <img src="${deck.mana_chart_thumbnail}" />
       ` : '' }
-      ${loading ? html`<br /><br />Loading...<br />` : '' }
-      ${error ? html`<br /><br />${error}<br />` : '' }
     </div>
   `;
 };
