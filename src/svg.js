@@ -16,6 +16,7 @@ import { useSpring, useSpring2 } from "./use-spring.js";
 import { useSprings } from "./use-springs.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
 import { Gradients } from "./gradients.js";
+import { panFor } from "./pan.js";
 
 const useZoomSpring = (ik) => {
   const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 150, damping: 50, mass: 3 });
@@ -124,30 +125,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
   const r = 0.1; // radius
   const diameter = r * 2;
 
-  const nextPan = ((focusedDeck) => {
-    // returning [0, 0, 1] will fit the entire coordinate space into the svg area, viewing everything. Decks will look tiny.
-    if (!focusedDeck) return [0, 0, 1];
-    // the larger the factor, the more zoomed out.
-    // size = 1 * diameter means that one deck circle will fit the viewport at the smallest dimension.
-    // size = 10 * diameter means that ten deck circles can fit the viewport at the smallest dimension.
-    const size = 1// diameter * zScale(zoomLevel)
-
-    // mlrec's 2D layout often puts a deck at the edge of its own neighbourhood, so centring on
-    // the deck left the cluster half off screen when zoomed out. At the outermost zoom level,
-    // centre on the whole neighbourhood (the deck included); from there in, on the deck. (Blending
-    // the two landed in the empty gap when a deck sits far from its cluster.)
-    const mid = (values, fallback) => values.length ? (Math.min(...values) + Math.max(...values)) / 2 : fallback;
-    const t = zoomLevel <= 1 ? 0 : 1;
-    const centerX = xScale(mid(xValues, focusedDeck.x) * (1 - t) + focusedDeck.x * t);
-    const centerY = yScale(mid(yValues, focusedDeck.y) * (1 - t) + focusedDeck.y * t);
-
-    const k = Math.min(width, height) / size; // scale
-    const translate = [
-      width / 2 - centerX * k,
-      height / 2 - centerY * k
-    ];
-    return [...translate, k];
-  })(focused && bySlug[focused]);
+  const nextPan = panFor({ focusedDeck: focused && bySlug[focused], zoomLevel, xValues, yValues, xScale, yScale, width, height });
 
   const { syncedValues, update: updatePanSpring } = usePanSpring(
     ...nextPan
