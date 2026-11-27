@@ -132,8 +132,14 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
     // size = 10 * diameter means that ten deck circles can fit the viewport at the smallest dimension.
     const size = 1// diameter * zScale(zoomLevel)
 
-    const centerX = xScale(focusedDeck.x);
-    const centerY = yScale(focusedDeck.y);
+    // mlrec's 2D layout often puts a deck at the edge of its own neighbourhood, so centring on
+    // the deck left the cluster half off screen when zoomed out. At the outermost zoom level,
+    // centre on the whole neighbourhood (the deck included); from there in, on the deck. (Blending
+    // the two landed in the empty gap when a deck sits far from its cluster.)
+    const mid = (values, fallback) => values.length ? (Math.min(...values) + Math.max(...values)) / 2 : fallback;
+    const t = zoomLevel <= 1 ? 0 : 1;
+    const centerX = xScale(mid(xValues, focusedDeck.x) * (1 - t) + focusedDeck.x * t);
+    const centerY = yScale(mid(yValues, focusedDeck.y) * (1 - t) + focusedDeck.y * t);
 
     const k = Math.min(width, height) / size; // scale
     const translate = [
