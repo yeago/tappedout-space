@@ -16,6 +16,7 @@ import { useSpring, useSpring2 } from "./use-spring.js";
 import { useSprings } from "./use-springs.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
 import { Gradients } from "./gradients.js";
+import { backdropStars, backdropOpacity } from "./backdrop.js";
 
 const useZoomSpring = (ik) => {
   const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 150, damping: 50, mass: 3 });
@@ -163,6 +164,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
   const transform = `translate(${translateX}, ${translateY}) scale(${panK})`;
   const transformScale = `scale(${k})`;
   const circumference = 2 * Math.PI * r;
+  const stars = useMemo(() => backdropStars(data.backdrop, xScale, yScale, r * 0.45), [data.backdrop, xScale, yScale]);
   return html`
     <svg
       viewBox="${viewBox}"
@@ -240,6 +242,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
       <defs>${Gradients(decks)}</defs>
       <g id="view-scale" transform="${transformScale}" transform-origin="center" class="view">
       <g id="view" transform="${transform}" class="view">
+        ${stars.length ? svg`<g class="backdrop" opacity="${backdropOpacity(k)}" pointer-events="none">${stars}</g>` : ""}
         ${repeat(
           reorderedDecks,
           deck => deck.slug,
