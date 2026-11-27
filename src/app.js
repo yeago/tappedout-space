@@ -33,7 +33,7 @@ export const App = virtual(() => {
   const state = useSpace();
   const slug = state.lastLoadingSlug;
   const json = state.lastLoadedSlug && state.bySlug[state.lastLoadedSlug].json;
-  const { width, height } = useViewport();
+  const { width, height, insetLeft } = useViewport();
   const { value: focused, on: focus, reset: unfocus } = useComposeActiveState(
     "FOCUS",
     slug
@@ -87,6 +87,7 @@ export const App = virtual(() => {
         ? Svg({
             width,
             height,
+            insetLeft,
             data: dataWithClusters,
             focused,
             focus,
