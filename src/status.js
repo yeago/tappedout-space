@@ -12,6 +12,28 @@ const overlay = css`
   z-index: 2;
 `;
 
+// While a deck's neighbourhood loads, freeze the page: a slow reply otherwise looks like nothing
+// is happening, and people click again and stack up requests. The overlay covers everything,
+// sits above the zoom controls, and swallows clicks and wheel zooms until the data arrives.
+const blocking = css`
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: progress;
+  background: rgba(5, 6, 12, .35);
+  &.over-map {
+    background: rgba(5, 6, 12, .6);
+  }
+`;
+
+const swallow = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+};
+
 const loadingCss = css`
   display: grid;
   justify-items: center;
@@ -120,7 +142,8 @@ export const Status = ({ loading, error, retry, hasMap }) => {
   }
   if (loading) {
     return html`
-      <div class="${overlay}" role="status" aria-live="polite">
+      <div class="${blocking} ${hasMap ? "over-map" : ""}" role="status" aria-live="polite" aria-busy="true"
+        @click=${swallow} @dblclick=${swallow} @wheel=${swallow} @mousedown=${swallow} @touchstart=${swallow}>
         <div class="${loadingCss}">
           <div class="planet" aria-hidden="true">
             <div class="orbit"></div>
