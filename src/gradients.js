@@ -13,11 +13,11 @@ const calculateOffset = (i, total) => {
 };
 
 const hsls = {
-  B: [0, 0, 0],
-  R: [0, 100, 50],
-  G: [114, 100, 50],
-  U: [230, 100, 50],
-  W: [0, 0, 100],
+  B: [270, 26, 60],
+  R: [6, 73, 57],
+  G: [147, 51, 44],
+  U: [210, 72, 56],
+  W: [47, 74, 83],
 };
 
 const MonoColorLinearGradient = (stops) => {
@@ -67,9 +67,9 @@ const sortStops = (stops) => {
 const BlackRadialGradient = () => {
   return svg`
     <radialGradient id="grad_B" fx="80%" fy="20%" r="70%">
-      <stop stop-color="gray" offset="10%" />
+      <stop stop-color="#cdbde0" offset="10%" />
       <stop class="stop-B" offset="50%" />
-      <stop stop-color="#222" offset="80%" />
+      <stop stop-color="#5d4a73" offset="80%" />
       <stop class="stop-B" offset="100%" />
     </radialGradient>
   `;

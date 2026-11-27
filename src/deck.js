@@ -10,6 +10,7 @@ export const Deck = ({ deck, cx, cy, highlighted, focused, r, circumference }) =
   const gradient = `grad_${deck.mana_colors.join('')}`;
   return svg`
     <g>
+      ${focused ? svg`<circle class="focus-halo" cx="${cx}" cy="${cy}" r="${r * 4}" fill=${`url(${window.location.pathname}#focus_halo)`} />` : ""}
       <circle
         cx="${cx}"
         cy="${cy}"
@@ -21,6 +22,7 @@ export const Deck = ({ deck, cx, cy, highlighted, focused, r, circumference }) =
         data-votes-size=${votesSize(deck.votes)}
         fill=${`url(${window.location.pathname}#${gradient})`}
       />
+      ${focused ? svg`<circle class="focus-ring" cx="${cx}" cy="${cy}" r="${r * 1.7}" />` : ""}
     </g>
   `;
 };

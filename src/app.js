@@ -16,8 +16,10 @@ import { useLocationHash } from "./use-location-hash.js";
 import { useSpace } from "./use-space.js";
 import { useZoomLevels } from "./use-zoom-levels.js";
 import { ZoomControls } from "./zoom-controls.js";
+import { Status } from "./status.js";
 
 const styles = css`
+  position: relative;
   color: white;
   font-family: sans-serif;
   height: 100%;
@@ -75,6 +77,12 @@ export const App = virtual(() => {
         zoomLevel
       })}
       ${ZoomControls()}
+      ${Status({
+        loading: state.loading,
+        error: state.error,
+        retry: state.retry,
+        hasMap: Boolean(state.lastLoadedSlug)
+      })}
       ${state.lastLoadedSlug
         ? Svg({
             width,

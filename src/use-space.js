@@ -75,6 +75,8 @@ const reducer = (state, action) => {
 export const useSpace = () => {
   const hash = useLocationHash();
   const [state, dispatch] = useReducer(reducer, initialState);
+  // "Try again" after an error: bumping this re-runs the fetch for the same deck.
+  const [attempt, setAttempt] = useState(0);
   // The hash also carries view settings (e.g. "#my-deck?zoom=3"), and every zoom step
   // rewrites it. Only a different deck needs a fetch, so depend on the slug alone.
   const slug = hash ? hash.replace("#", "").split("?")[0] : "";
@@ -90,6 +92,6 @@ export const useSpace = () => {
     } catch (e) {
       dispatch({ type: "failed", message: e.message, slug });
     }
-  }, [slug]);
-  return state;
+  }, [slug, attempt]);
+  return { ...state, retry: () => setAttempt((n) => n + 1) };
 };
