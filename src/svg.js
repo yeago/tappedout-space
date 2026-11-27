@@ -16,7 +16,7 @@ import { useSpring, useSpring2 } from "./use-spring.js";
 import { useSprings } from "./use-springs.js";
 import { useComposeActiveState } from "./use-compose-active-state.js";
 import { Gradients } from "./gradients.js";
-import { panFor } from "./pan.js";
+import { panFor, zoomScaleFor, deckRadiusFor } from "./pan.js";
 
 const useZoomSpring = (ik) => {
   const k = useSpring2({ fromValue: ik, toValue: ik, stiffness: 150, damping: 50, mass: 3 });
@@ -121,17 +121,18 @@ export const Svg = ({ bySlug, data, width, height, insetLeft = 0, focused, focus
     },
     [focus, unfocus]
   );
-  // r = 1 is equal to 1px while completely focused out, when the coordinate space is entirely in view.
-  const r = 0.1; // radius
-  const diameter = r * 2;
-
   const nextPan = panFor({ focusedDeck: focused && bySlug[focused], zoomLevel, xValues, yValues, xScale, yScale, width, height });
+  const nextZoom = zoomScaleFor({ zoomLevel, xValues, yValues, xScale, yScale, width, height, k: nextPan[2] });
+
+  // r = 1 is equal to 1px while completely focused out, when the coordinate space is entirely in view.
+  // When zoom 1 has to fit a widely spread neighbourhood, decks would shrink below a pixel: keep each
+  // at least MIN_DOT_PX across on screen (no change at the usual zoom levels, where they're far larger).
+  const r = deckRadiusFor({ k: nextPan[2], zoom: nextZoom });
+  const diameter = r * 2;
 
   const { syncedValues, update: updatePanSpring } = usePanSpring(
     ...nextPan
   );
-  const zScale = scaleLinear().domain([1, 5]).range([0.15, 1]);
-  const nextZoom = zScale(zoomLevel)
   const { k, update: updateZoomSpring } = useZoomSpring(nextZoom);
 
   useEffect(() => {
