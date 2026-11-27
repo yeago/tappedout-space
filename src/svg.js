@@ -57,7 +57,7 @@ const spaceLimits = (limits, xValues, yValues) => {
   };
 };
 
-export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoomLevel }) => {
+export const Svg = ({ bySlug, data, width, height, insetLeft = 0, focused, focus, unfocus, zoomLevel }) => {
   const viewBox = `0 0 ${width} ${height}`;
   const decks = data.nodes;
   const {
@@ -151,6 +151,7 @@ export const Svg = ({ bySlug, data, width, height, focused, focus, unfocus, zoom
     <svg
       viewBox="${viewBox}"
       xmlns="http://www.w3.org/2000/svg"
+      style="display: block; width: ${width}px; height: ${height}px; margin-left: ${insetLeft}px; overflow: visible"
       class="${css`
         --circumference: ${circumference};
         --r: ${r}px;
